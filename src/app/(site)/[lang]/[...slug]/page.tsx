@@ -47,7 +47,17 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
         return notFound()
     }
 
-    let finalContent = postData.content
+    // Strip WordPress block comments, literal \n escape sequences and markdown escapes
+    const rawContent = postData.htmlContent || postData.content || ''
+    const finalContent = rawContent
+        .replace(/<!--[\s\S]*?-->/g, '')          // strip ALL HTML comments (wp block markers etc.)
+        .replace(/\\\\n/g, '')                     // strip literal backslash-n sequences
+        .replace(/\\\\_/g, '')                     // strip markdown escape: \_
+        .replace(/\\\\\\\\/g, '')                  // strip double backslashes
+        .replace(/>\s*n+\s*</g, '><')              // remove stray 'n's between HTML tags
+        .replace(/^\s*n+\s*(?=<)/g, '')            // remove stray 'n's at the start before an HTML tag
+        .replace(/(?<=>)\s*n+\s*$/g, '')           // remove stray 'n's at the end after an HTML tag
+        .trim()
     let finalTitle = postData.title
 
     // Determine the breadcrumb based on category
@@ -134,23 +144,16 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
                     </div>
                 )}
 
-                {postData.htmlContent ? (
+                {finalContent ? (
                     <div
                         className="prose prose-lg max-w-none text-gray-700 font-sans leading-relaxed
                             prose-headings:font-display prose-headings:text-gray-900
                             prose-a:text-[#76A662] prose-a:no-underline hover:prose-a:underline
                             prose-strong:text-gray-900
                             prose-img:rounded-xl prose-img:shadow-md"
-                        dangerouslySetInnerHTML={{ __html: postData.htmlContent }}
+                        dangerouslySetInnerHTML={{ __html: finalContent }}
                     />
-                ) : (
-                    <div className="prose prose-lg max-w-none text-gray-700 font-sans leading-relaxed whitespace-pre-wrap
-                        prose-headings:font-display prose-headings:text-gray-900
-                        prose-a:text-[#76A662] prose-a:no-underline hover:prose-a:underline
-                        prose-strong:text-gray-900">
-                        {finalContent}
-                    </div>
-                )}
+                ) : null}
 
                 {/* Bottom navigation */}
                 {breadcrumb && (

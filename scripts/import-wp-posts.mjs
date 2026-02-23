@@ -45,7 +45,14 @@ function parseTuple(sql, startPos) {
             endPos = i;
             break;
         } else {
-            currentField += char;
+            if (escaped) {
+                if (char === 'n') currentField += '\n';
+                else if (char === 'r') currentField += '\r';
+                else if (char === 't') currentField += '\t';
+                else currentField += char;
+            } else {
+                currentField += char;
+            }
         }
         escaped = false;
     }
