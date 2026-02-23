@@ -1,0 +1,91 @@
+import { STATIC_PAGE_SLUGS } from '@/lib/static-pages'
+
+// About pages
+import AboutOverviewPage from '@/components/pages/about/OverviewPage'
+import ModelPage from '@/components/pages/about/ModelPage'
+import CouncilPage from '@/components/pages/about/CouncilPage'
+import ImpactPage from '@/components/pages/about/ImpactPage'
+import LeadershipPage from '@/components/pages/about/LeadershipPage'
+
+// Expertise pages
+import ExpertisePage from '@/components/pages/expertise/ExpertisePage'
+import FrameworkPage from '@/components/pages/expertise/FrameworkPage'
+import OpenInnovationPage from '@/components/pages/expertise/OpenInnovationPage'
+import CorporateTransformationPage from '@/components/pages/expertise/CorporateTransformationPage'
+import VentureBuildingPage from '@/components/pages/expertise/VentureBuildingPage'
+import ClientsPage from '@/components/pages/expertise/ClientsPage'
+
+// Stories pages
+import StoriesPage from '@/components/pages/stories/StoriesPage'
+
+// Insights pages
+import InsightsPage from '@/components/pages/insights/InsightsPage'
+
+// Contact pages
+import ContactPage from '@/components/pages/contact/ContactPage'
+import CookiesPage from '@/components/pages/contact/CookiesPage'
+import PrivacyPage from '@/components/pages/contact/PrivacyPage'
+import LegalNoticePage from '@/components/pages/contact/LegalNoticePage'
+import CompliancePage from '@/components/pages/contact/CompliancePage'
+
+// Community pages
+import CommunityPage from '@/components/pages/community/CommunityPage'
+
+export function isStaticPage(slugPath: string): boolean {
+    return STATIC_PAGE_SLUGS.has(slugPath)
+}
+
+export function getStaticPageComponent(slugPath: string, lang: string): React.ReactNode | null {
+    const props = { lang }
+
+    switch (slugPath) {
+        // About section
+        case 'about': return <AboutOverviewPage {...props} />
+        case 'model': return <ModelPage {...props} />
+        case 'senior-expert-council': return <CouncilPage {...props} />
+        case 'about/impact': return <ImpactPage {...props} />
+        case 'leadership': return <LeadershipPage {...props} />
+
+        // Expertise section
+        case 'expertise': return <ExpertisePage {...props} />
+        case 'framework': return <FrameworkPage {...props} />
+        case 'open-innovation': return <OpenInnovationPage {...props} />
+        case 'corporate-transformation': return <CorporateTransformationPage {...props} />
+        case 'venture-building': return <VentureBuildingPage {...props} />
+        case 'clients': return <ClientsPage {...props} />
+
+        // Stories section
+        case 'stories':
+        case 'stories/impact':
+        case 'stories/news':
+        case 'stories/press-releases':
+        case 'stories/press':
+            return <StoriesPage {...props} category={slugPath === 'stories' ? 'all' : slugPath.split('/')[1]} />
+
+        // Insights section
+        case 'insights':
+        case 'insights/articles':
+        case 'insights/voices':
+        case 'insights/publications':
+        case 'insights/conferences':
+            return <InsightsPage {...props} category={slugPath === 'insights' ? 'all' : slugPath.split('/')[1]} />
+
+        // Contact/Legal section
+        case 'contact': return <ContactPage {...props} />
+        case 'cookies': return <CookiesPage {...props} />
+        case 'privacy': return <PrivacyPage {...props} />
+        case 'legal-notice': return <LegalNoticePage {...props} />
+        case 'compliance': return <CompliancePage {...props} />
+        case 'quality-environment': return <CompliancePage {...props} />
+        case 'equality-plan': return <CompliancePage {...props} />
+
+        // Community section
+        case 'work':
+        case 'events':
+        case 'challenges':
+        case 'academy':
+            return <CommunityPage {...props} section={slugPath} />
+
+        default: return null
+    }
+}
