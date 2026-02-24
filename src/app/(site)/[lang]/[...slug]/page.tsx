@@ -61,8 +61,9 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
         .trim()
 
     // Remove leading <img> from content if we already show the featured image
+    // WordPress exports use various formats: <img.../>, <img...>, <img...></img>, <img...></ img>
     if (postData.featuredImage) {
-        finalContent = finalContent.replace(/^\s*<img[^>]*\/?>\s*/i, '')
+        finalContent = finalContent.replace(/^\s*<img[^>]*>(?:\s*<\/\s*img\s*>)?\s*/i, '')
     }
     let finalTitle = postData.title
 
