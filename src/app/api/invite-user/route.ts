@@ -1,51 +1,90 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+
+// Initialize Firebase Admin (for generating sign-in links server-side)
+function getAdminApp() {
+    if (getApps().length > 0) return getApps()[0];
+    return initializeApp({
+        credential: cert({
+            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        }),
+    });
+}
 
 export async function POST(req: Request) {
     try {
         const { email, role, hostUrl } = await req.json();
 
         if (!email) {
-            return NextResponse.json({ error: "Email is required." }, { status: 400 });
+            return NextResponse.json({ error: 'Email is required.' }, { status: 400 });
         }
 
         const resendApiKey = process.env.RESEND_API_KEY;
         if (!resendApiKey) {
-            console.error("Missing RESEND_API_KEY environment variable.");
-            return NextResponse.json(
-                { error: "Internal server error: missing email provider configuration." },
-                { status: 500 }
-            );
+            return NextResponse.json({ error: 'Missing email provider configuration.' }, { status: 500 });
+        }
+
+        // Generate a Firebase magic sign-in link
+        let loginUrl = `${hostUrl}/admin`;
+        try {
+            const adminApp = getAdminApp();
+            const adminAuth = getAuth(adminApp);
+            const actionCodeSettings = {
+                url: `${hostUrl}/admin/login/verify`,
+                handleCodeInApp: true,
+            };
+            loginUrl = await adminAuth.generateSignInWithEmailLink(email, actionCodeSettings);
+        } catch (adminErr: any) {
+            // Firebase Admin not configured — fall back to plain login URL
+            console.warn('Firebase Admin not available, falling back to plain login URL:', adminErr.message);
+            loginUrl = `${hostUrl}/admin`;
         }
 
         const resend = new Resend(resendApiKey);
-        const loginUrl = `${hostUrl}/admin`;
 
-        const data = await resend.emails.send({
-            from: 'Opinno CMS <onboarding@resend.dev>', // Use resend test domain until you verify opinno.com
+        const { data, error } = await resend.emails.send({
+            from: 'Opinno CMS <noreply@010bits.com>',
             to: email,
             subject: 'You have been invited to the Opinno CMS',
             html: `
-                <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                    <h2 style="color: #0b2341;">Welcome to Opinno</h2>
-                    <p>You have been invited to access the Opinno Content Management System as an <b>${role.toUpperCase()}</b>.</p>
-                    <p>You can now log in securely using your email address, or via Google Sign-In if you use Google Workspace.</p>
-                    <div style="margin: 30px 0;">
-                        <a href="${loginUrl}" style="background-color: #fca311; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                            Log in to Opinno CMS
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; color: #1F2A38;">
+                    <div style="margin-bottom: 32px;">
+                        <span style="font-size: 22px; font-weight: 800; color: #0b2341; letter-spacing: -0.5px;">Opinno CMS</span>
+                    </div>
+                    <h1 style="font-size: 24px; font-weight: 700; color: #0b2341; margin: 0 0 12px;">You've been invited</h1>
+                    <p style="font-size: 16px; color: #4B5563; line-height: 1.6; margin: 0 0 24px;">
+                        You have been granted access to the Opinno Content Management System as an <strong>${role.toUpperCase()}</strong>.
+                        Click the button below to log in — no password needed.
+                    </p>
+                    <div style="margin: 32px 0;">
+                        <a href="${loginUrl}" style="display: inline-block; background-color: #fca311; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px;">
+                            Log in to Opinno CMS →
                         </a>
                     </div>
-                    <p style="font-size: 12px; color: #888;">If you believe you received this email by mistake, please ignore it.</p>
+                    <p style="font-size: 13px; color: #9CA3AF; line-height: 1.5; margin: 0;">
+                        This link expires in 24 hours. If you did not expect this invitation, you can safely ignore this email.
+                    </p>
+                    <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;" />
+                    <p style="font-size: 12px; color: #D1D5DB; margin: 0;">Opinno · opinno.com</p>
                 </div>
             `,
         });
 
+        if (error) {
+            console.error('Resend error:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
         return NextResponse.json({ success: true, data });
 
     } catch (error: any) {
-        console.error("Invite Error:", error);
+        console.error('Invite Error:', error);
         return NextResponse.json(
-            { error: "Error sending invitation email.", details: error.message },
+            { error: 'Error sending invitation email.', details: error.message },
             { status: 500 }
         );
     }
