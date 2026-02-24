@@ -1,7 +1,6 @@
 import InteriorPageLayout from '@/components/InteriorPageLayout'
 import { getSidebar } from "@/lib/page-data"
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { queryCollection } from '@/lib/firestore-server'
 import Link from 'next/link'
 
 interface StoriesPageProps {
@@ -24,27 +23,18 @@ export default async function StoriesPage({ lang, category = 'all' }: StoriesPag
     let stories: any[] = []
 
     try {
-        const contentRef = collection(db, 'content')
-        let q;
+        const filters = category === 'all'
+            ? [
+                { field: 'category', op: '==' as const, value: 'story' },
+                { field: 'lang', op: '==' as const, value: lang },
+            ]
+            : [
+                { field: 'category', op: '==' as const, value: 'story' },
+                { field: 'subCategory', op: '==' as const, value: category },
+                { field: 'lang', op: '==' as const, value: lang },
+            ]
 
-        if (category === 'all') {
-            q = query(contentRef,
-                where('category', '==', 'story'),
-                where('lang', '==', lang)
-            )
-        } else {
-            // Handle sub-categories (impact, news, press)
-            q = query(contentRef,
-                where('category', '==', 'story'),
-                where('subCategory', '==', category),
-                where('lang', '==', lang)
-            )
-        }
-
-        const contentSnapshot = await getDocs(q)
-
-        stories = contentSnapshot.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
+        stories = (await queryCollection('content', filters))
             .filter((p: any) => p.title)
             .sort((a: any, b: any) => {
                 const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0

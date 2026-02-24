@@ -39,6 +39,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const [authError, setAuthError] = useState<string | null>(null)
 
+    // Auto-complete email link sign-in on any page (like Disruptor)
+    useEffect(() => {
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+            let email = window.localStorage.getItem('emailForSignIn')
+            if (!email) {
+                email = window.prompt('Please provide your email for confirmation')
+            }
+            if (email) {
+                signInWithEmailLink(auth, email, window.location.href)
+                    .then(() => {
+                        window.localStorage.removeItem('emailForSignIn')
+                        // Clean up URL params
+                        window.history.replaceState({}, '', window.location.pathname)
+                    })
+                    .catch((error) => {
+                        console.error('Error completing email link sign-in:', error)
+                        setAuthError(error.message || 'Failed to complete sign-in. The link may have expired.')
+                    })
+            }
+        }
+    }, [])
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setUser(user)
@@ -113,21 +135,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const loginWithOTP = async (email: string) => {
-        const res = await fetch('/api/login-link', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email,
-                hostUrl: window.location.origin
-            })
-        })
+        const safeEmail = email.toLowerCase().trim()
 
-        if (!res.ok) {
-            const err = await res.json()
-            throw new Error(err.details || err.error || 'Failed to send login link')
+        // Verify user is authorized before sending the link
+        const userRef = doc(db, 'users', safeEmail)
+        const userSnap = await getDoc(userRef)
+        if (!userSnap.exists()) {
+            throw new Error('This email is not authorized to access the CMS.')
         }
 
-        window.localStorage.setItem('emailForSignIn', email)
+        // Send sign-in link directly via Firebase client SDK (no admin credentials needed)
+        await sendSignInLinkToEmail(auth, safeEmail, {
+            url: `${window.location.origin}/admin/login/verify`,
+            handleCodeInApp: true,
+        })
+
+        window.localStorage.setItem('emailForSignIn', safeEmail)
     }
 
     const completeOTPLogin = async (url: string) => {

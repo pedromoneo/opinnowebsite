@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { queryCollection, getDocument } from '@/lib/firestore-server'
 import { isStaticPage, getStaticPageComponent } from '@/lib/static-page-router'
 import Link from 'next/link'
 
@@ -21,24 +20,26 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
     // The import script saves docs with IDs like: 'en-the-actual-slug'
     const actualSlug = resolvedParams.slug[resolvedParams.slug.length - 1]
     const docId = `${lang}-${actualSlug}`
-    const docRef = doc(db, 'content', docId)
-    const docSnap = await getDoc(docRef);
 
     let postData;
-    if (docSnap.exists()) {
-        postData = docSnap.data()
+    const docResult = await getDocument('content', docId)
+    if (docResult) {
+        postData = docResult
     } else {
         // Fallback: try querying by slugPath AND lang
-        const q1 = query(collection(db, 'content'), where('slugPath', '==', slugPath), where('lang', '==', lang))
-        const snap1 = await getDocs(q1)
-        if (!snap1.empty) {
-            postData = snap1.docs[0].data()
+        const results1 = await queryCollection('content', [
+            { field: 'slugPath', op: '==', value: slugPath },
+            { field: 'lang', op: '==', value: lang },
+        ])
+        if (results1.length > 0) {
+            postData = results1[0]
         } else {
             // Absolute fallback: try getting ANY language version if they specifically hard-linked to it
-            const q2 = query(collection(db, 'content'), where('slugPath', '==', slugPath))
-            const snap2 = await getDocs(q2)
-            if (!snap2.empty) {
-                postData = snap2.docs[0].data()
+            const results2 = await queryCollection('content', [
+                { field: 'slugPath', op: '==', value: slugPath },
+            ])
+            if (results2.length > 0) {
+                postData = results2[0]
             }
         }
     }

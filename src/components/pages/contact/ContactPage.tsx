@@ -1,4 +1,5 @@
 import InteriorPageLayout from '@/components/InteriorPageLayout'
+import ContactForm from '@/components/ContactForm'
 import { getSidebar, OFFICE_LOCATIONS } from '@/lib/page-data'
 
 export default function ContactPage({ lang }: { lang: string }) {
@@ -16,34 +17,7 @@ export default function ContactPage({ lang }: { lang: string }) {
 
             {/* Contact form */}
             <div className="mb-16">
-                <form className="space-y-4 max-w-xl">
-                    <input type="text" placeholder={lang === 'es' ? 'Nombre *' : lang === 'it' ? 'Nome *' : 'Name *'} className="w-full px-4 py-3 border border-opinno-border rounded-lg text-sm font-body focus:outline-none focus:border-opinno-accent" />
-                    <input type="email" placeholder={lang === 'es' ? 'Correo electrónico *' : lang === 'it' ? 'Email *' : 'Email *'} className="w-full px-4 py-3 border border-opinno-border rounded-lg text-sm font-body focus:outline-none focus:border-opinno-accent" />
-                    <select className="w-full px-4 py-3 border border-opinno-border rounded-lg text-sm font-body text-opinno-gray focus:outline-none focus:border-opinno-accent bg-white">
-                        <option value="">{lang === 'es' ? 'País' : lang === 'it' ? 'Paese' : 'Country'}</option>
-                        <option>United States</option>
-                        <option>Spain</option>
-                        <option>Italy</option>
-                        <option>Mexico</option>
-                        <option>Colombia</option>
-                        <option>Ecuador</option>
-                        <option>Peru</option>
-                        <option>Argentina</option>
-                        <option>Portugal</option>
-                        <option>Saudi Arabia</option>
-                        <option>United Arab Emirates</option>
-                        <option>Other</option>
-                    </select>
-                    <input type="text" placeholder={lang === 'es' ? 'Empresa' : lang === 'it' ? 'Azienda' : 'Company'} className="w-full px-4 py-3 border border-opinno-border rounded-lg text-sm font-body focus:outline-none focus:border-opinno-accent" />
-                    <textarea placeholder={lang === 'es' ? '¿Cómo podemos ayudarte? *' : lang === 'it' ? 'Come possiamo aiutarti? *' : 'How can we help you? *'} rows={5} className="w-full px-4 py-3 border border-opinno-border rounded-lg text-sm font-body focus:outline-none focus:border-opinno-accent resize-none" />
-                    <div className="flex items-start gap-2">
-                        <input type="checkbox" id="accept-privacy" className="mt-1 accent-opinno-accent" />
-                        <label htmlFor="accept-privacy" className="text-sm text-opinno-gray font-body">
-                            {lang === 'es' ? 'He leído y acepto la ' : lang === 'it' ? 'Ho letto e accetto la ' : 'I have read and accept Opinno\'s '}<a href={`/${lang}/privacy`} className="text-opinno-accent hover:underline">{lang === 'es' ? 'Política de Privacidad' : lang === 'it' ? 'Informativa sulla privacy' : 'Privacy Policy'}</a>.
-                        </label>
-                    </div>
-                    <button type="submit" className="btn-primary" style={{ padding: '0.75rem 2rem', fontSize: '0.875rem' }}>{lang === 'es' ? 'ENVIAR' : lang === 'it' ? 'INVIA' : 'SUBMIT'}</button>
-                </form>
+                <ContactForm lang={lang} />
             </div>
 
             {/* Opinno Global / World Map */}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore'
+import { collection, query, orderBy, limit, getDocs, getCountFromServer } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import Link from 'next/link'
 
@@ -36,7 +36,11 @@ export default function AdminDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch recent posts
+                // Get real total count (no document download)
+                const countSnap = await getCountFromServer(collection(db, 'content'))
+                setTotalPosts(countSnap.data().count)
+
+                // Fetch recent posts (limited for display)
                 const postsSnap = await getDocs(query(collection(db, 'content'), limit(100)))
                 const posts: RecentItem[] = postsSnap.docs.map(doc => ({
                     id: doc.id,
@@ -47,7 +51,6 @@ export default function AdminDashboard() {
                     lang: doc.data().lang,
                     slug: doc.data().slug,
                 }))
-                setTotalPosts(posts.length)
 
                 // Fetch recent pages
                 const pagesSnap = await getDocs(query(collection(db, 'pages'), limit(50)))

@@ -1,7 +1,6 @@
 import InteriorPageLayout from '@/components/InteriorPageLayout'
 import { getSidebar } from "@/lib/page-data"
-import { db } from '@/lib/firebase'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { queryCollection } from '@/lib/firestore-server'
 import Link from 'next/link'
 
 interface CommunityPageProps {
@@ -74,12 +73,9 @@ export default async function CommunityPage({ lang, section }: CommunityPageProp
 
     if (firestoreCategory) {
         try {
-            const contentRef = collection(db, 'content')
-            const q = query(contentRef, where('category', '==', firestoreCategory))
-            const snapshot = await getDocs(q)
-
-            posts = snapshot.docs
-                .map(doc => ({ id: doc.id, ...doc.data() }))
+            posts = (await queryCollection('content', [
+                { field: 'category', op: '==', value: firestoreCategory },
+            ]))
                 .filter((p: any) => p.title)
                 .sort((a: any, b: any) => {
                     const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0

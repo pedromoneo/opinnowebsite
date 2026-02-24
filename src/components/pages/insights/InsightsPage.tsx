@@ -1,7 +1,6 @@
 import InteriorPageLayout from '@/components/InteriorPageLayout'
 import { getSidebar } from "@/lib/page-data"
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { queryCollection } from '@/lib/firestore-server'
 import Link from 'next/link'
 
 interface InsightsPageProps {
@@ -24,38 +23,26 @@ export default async function InsightsPage({ lang, category = 'all' }: InsightsP
     let insights: any[] = []
 
     try {
-        const contentRef = collection(db, 'content')
         let allDocs: any[] = []
 
         if (category === 'all') {
-            // Query for insights AND stories
-            const qInsight = query(contentRef,
-                where('category', '==', 'insight'),
-                where('lang', '==', lang)
-            )
-            const qStory = query(contentRef,
-                where('category', '==', 'story'),
-                where('lang', '==', lang)
-            )
-
-            const [insightSnap, storySnap] = await Promise.all([
-                getDocs(qInsight),
-                getDocs(qStory),
+            const [insightDocs, storyDocs] = await Promise.all([
+                queryCollection('content', [
+                    { field: 'category', op: '==', value: 'insight' },
+                    { field: 'lang', op: '==', value: lang },
+                ]),
+                queryCollection('content', [
+                    { field: 'category', op: '==', value: 'story' },
+                    { field: 'lang', op: '==', value: lang },
+                ]),
             ])
-
-            allDocs = [
-                ...insightSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })),
-                ...storySnap.docs.map(doc => ({ id: doc.id, ...doc.data() })),
-            ]
+            allDocs = [...insightDocs, ...storyDocs]
         } else {
-            // Filter by specific subCategory (voices, articles, etc.)
-            const q = query(contentRef,
-                where('category', '==', 'insight'),
-                where('subCategory', '==', category),
-                where('lang', '==', lang)
-            )
-            const snap = await getDocs(q)
-            allDocs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            allDocs = await queryCollection('content', [
+                { field: 'category', op: '==', value: 'insight' },
+                { field: 'subCategory', op: '==', value: category },
+                { field: 'lang', op: '==', value: lang },
+            ])
         }
 
         insights = allDocs

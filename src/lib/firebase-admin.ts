@@ -1,16 +1,20 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { initializeApp, getApps, cert, applicationDefault } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { existsSync } from 'fs';
+import { join } from 'path';
+import { homedir } from 'os';
 
 export function getAdminApp() {
     if (getApps().length > 0) return getApps()[0];
 
-    // Try individual variables first
-    let privateKey = (process.env.FIREBASE_ADMIN_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY)?.replace(/\\n/g, '\n');
-    let clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL || process.env.FIREBASE_CLIENT_EMAIL;
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
-    // Fallback to service account JSON string if provided (common in some environments)
+    // 1. Try individual env variables first (production)
+    let privateKey = (process.env.FIREBASE_ADMIN_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY)?.replace(/\\n/g, '\n');
+    let clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL || process.env.FIREBASE_CLIENT_EMAIL;
+
+    // Fallback to service account JSON string if provided
     const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || process.env.FBASE_SERVICE_ACCOUNT_KEY;
     if (serviceAccountVar && (!privateKey || !clientEmail)) {
         try {
@@ -22,23 +26,32 @@ export function getAdminApp() {
         }
     }
 
-    if (!privateKey || !clientEmail || !projectId) {
-        throw new Error(
-            'Missing Firebase Admin configuration. To fix this:\n' +
-            '1. Go to Firebase Console > Project Settings > Service Accounts\n' +
-            '2. Generate a new private key and download the JSON\n' +
-            '3. Add FIREBASE_ADMIN_PRIVATE_KEY and FIREBASE_ADMIN_CLIENT_EMAIL to your .env.local\n' +
-            '   or add the whole JSON as FIREBASE_SERVICE_ACCOUNT_KEY.'
-        );
+    if (privateKey && clientEmail && projectId) {
+        return initializeApp({
+            credential: cert({ projectId, clientEmail, privateKey }),
+        });
     }
 
-    return initializeApp({
-        credential: cert({
+    // 2. Fall back to Application Default Credentials (Firebase CLI login)
+    if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        const adcPath = join(homedir(), '.config', 'firebase', `${(process.env.FIREBASE_AUTH_EMAIL || 'pedro_moneo_gmail.com').replace(/[@.]/g, '_')}_application_default_credentials.json`);
+        if (existsSync(adcPath)) {
+            process.env.GOOGLE_APPLICATION_CREDENTIALS = adcPath;
+        }
+    }
+
+    try {
+        return initializeApp({
+            credential: applicationDefault(),
             projectId,
-            clientEmail,
-            privateKey,
-        }),
-    });
+        });
+    } catch (e) {
+        throw new Error(
+            'Missing Firebase Admin configuration. Either:\n' +
+            '1. Run "firebase login" to authenticate the CLI, or\n' +
+            '2. Add FIREBASE_ADMIN_PRIVATE_KEY and FIREBASE_ADMIN_CLIENT_EMAIL to .env.local'
+        );
+    }
 }
 
 // Export lazy-loaded getters to avoid top-level crashes if env vars are missing

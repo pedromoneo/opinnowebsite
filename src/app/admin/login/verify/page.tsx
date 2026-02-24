@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
 
@@ -8,6 +8,36 @@ export default function VerifyOTP() {
     const { completeOTPLogin, user } = useAuth()
     const router = useRouter()
     const [status, setStatus] = useState('Verifying OTP link...')
+    const [isError, setIsError] = useState(false)
+    const verifyAttempted = useRef(false)
+
+    const handleVerify = useCallback(async () => {
+        // Guard against double execution (React Strict Mode, dependency changes)
+        if (verifyAttempted.current) return
+        verifyAttempted.current = true
+
+        try {
+            const url = window.location.href
+            // Let Firebase determine if this is a valid sign-in link
+            // instead of fragile apiKey= check
+            if (url.includes('oobCode=') || url.includes('apiKey=')) {
+                await completeOTPLogin(url)
+                setStatus('Successfully verified! Redirecting...')
+                router.push('/admin')
+            } else {
+                setIsError(true)
+                setStatus('Invalid or expired link. Please request a new one.')
+            }
+        } catch (err: any) {
+            setIsError(true)
+            const message = err?.code === 'auth/invalid-action-code'
+                ? 'This link has expired or already been used. Please request a new one.'
+                : err?.code === 'auth/invalid-email'
+                ? 'Email mismatch. Please use the same browser where you requested the link.'
+                : err?.message || 'Verification failed. Please try again.'
+            setStatus(message)
+        }
+    }, [completeOTPLogin, router])
 
     useEffect(() => {
         if (user) {
@@ -15,22 +45,8 @@ export default function VerifyOTP() {
             return
         }
 
-        const handleVerify = async () => {
-            try {
-                if (window.location.href.includes('apiKey=')) {
-                    await completeOTPLogin(window.location.href)
-                    setStatus('Successfully verified! Redirecting...')
-                    router.push('/admin')
-                } else {
-                    setStatus('Invalid link or already verified.')
-                }
-            } catch (err: any) {
-                setStatus(`Error: ${err.message}`)
-            }
-        }
-
         handleVerify()
-    }, [completeOTPLogin, user, router])
+    }, [user, router, handleVerify])
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -41,8 +57,17 @@ export default function VerifyOTP() {
                     </svg>
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2 font-display">Authentication</h1>
-                <p className="text-gray-600 mb-6">{status}</p>
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-opinno-accent mx-auto"></div>
+                <p className={`mb-6 ${isError ? 'text-red-600' : 'text-gray-600'}`}>{status}</p>
+                {isError ? (
+                    <a
+                        href="/admin"
+                        className="inline-block px-6 py-2 bg-opinno-accent text-white rounded-lg font-medium text-sm hover:bg-opinno-accent-hover transition-colors"
+                    >
+                        Back to Login
+                    </a>
+                ) : (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-opinno-accent mx-auto"></div>
+                )}
             </div>
         </div>
     )

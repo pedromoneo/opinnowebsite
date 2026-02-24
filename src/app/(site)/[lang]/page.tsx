@@ -1,6 +1,6 @@
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { queryCollection } from '@/lib/firestore-server'
 import Link from 'next/link'
+import HomeContactForm from '@/components/HomeContactForm'
 
 export const dynamic = 'force-dynamic';
 
@@ -98,11 +98,10 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
     let latestNews: any[] = []
 
     try {
-        const qStories = query(collection(db, 'content'), where('category', '==', 'story'), where('lang', '==', lang))
-        const snapStories = await getDocs(qStories)
-
-        let allStories = snapStories.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[]
-        allStories = allStories
+        const allStories = (await queryCollection('content', [
+            { field: 'category', op: '==', value: 'story' },
+            { field: 'lang', op: '==', value: lang },
+        ]))
             .filter(p => p.title)
             .sort((a, b) => {
                 const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
@@ -115,12 +114,10 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
 
         if (latestNews.length === 0) latestNews = allStories.slice(4, 8) // fallback if none tagged
 
-        const qInsights = query(collection(db, 'content'), where('category', '==', 'insight'), where('lang', '==', lang))
-        const snapInsights = await getDocs(qInsights)
-
-        latestInsights = snapInsights.docs
-            .map(doc => ({ id: doc.id, ...doc.data() })) as any[]
-        latestInsights = latestInsights
+        latestInsights = (await queryCollection('content', [
+            { field: 'category', op: '==', value: 'insight' },
+            { field: 'lang', op: '==', value: lang },
+        ]))
             .filter(p => p.title)
             .sort((a, b) => {
                 const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
@@ -222,7 +219,7 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                             {CENTERS_OF_EXCELLENCE.map(center => (
                                 <span
                                     key={center}
-                                    className="px-4 py-2 bg-white border border-opinno-border text-opinno-gray text-sm font-medium rounded hover:border-opinno-accent hover:text-opinno-accent transition-colors cursor-pointer"
+                                    className="px-4 py-2 bg-white border border-opinno-border text-opinno-gray text-sm font-medium rounded"
                                 >
                                     {center}
                                 </span>
@@ -250,9 +247,9 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                             impactStories.map((story: any) => (
                                 <StoryCard
                                     key={story.id}
-                                    date={story.publishedAt ? new Date(story.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                                    date={formatDate(story.publishedAt, lang)}
                                     title={story.title}
-                                    excerpt={story.excerpt?.substring(0, 120) + '...'}
+                                    excerpt={story.excerpt || ''}
                                     image={story.featuredImage}
                                     href={`/${lang}/${story.slugPath}`}
                                 />
@@ -349,9 +346,9 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                         {latestInsights.map((insight: any) => (
                             <StoryCard
                                 key={insight.id}
-                                date={insight.publishedAt ? new Date(insight.publishedAt).toLocaleDateString() : ''}
+                                date={formatDate(insight.publishedAt, lang)}
                                 title={insight.title}
-                                excerpt={insight.excerpt}
+                                excerpt={insight.excerpt || ''}
                                 image={insight.featuredImage}
                                 href={`/${lang}/${insight.slugPath}`}
                             />
@@ -377,9 +374,9 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                         {latestNews.map((news: any) => (
                             <StoryCard
                                 key={news.id}
-                                date={news.publishedAt ? new Date(news.publishedAt).toLocaleDateString() : ''}
+                                date={formatDate(news.publishedAt, lang)}
                                 title={news.title}
-                                excerpt={news.excerpt}
+                                excerpt={news.excerpt || ''}
                                 image={news.featuredImage}
                                 href={`/${lang}/${news.slugPath}`}
                             />
@@ -416,41 +413,28 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                         <p className="text-opinno-gray text-lg font-body mb-10">
                             We would love to know about you and help you innovate!
                         </p>
-                        <div className="bg-white rounded-2xl p-8 md:p-12 shadow-sm">
-                            <form className="flex flex-col gap-5">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                    <input
-                                        type="text"
-                                        placeholder="Name *"
-                                        className="w-full px-4 py-3 border border-opinno-border rounded text-sm focus:outline-none focus:border-opinno-accent font-body"
-                                    />
-                                    <input
-                                        type="email"
-                                        placeholder="Email *"
-                                        className="w-full px-4 py-3 border border-opinno-border rounded text-sm focus:outline-none focus:border-opinno-accent font-body"
-                                    />
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="Company"
-                                    className="w-full px-4 py-3 border border-opinno-border rounded text-sm focus:outline-none focus:border-opinno-accent font-body"
-                                />
-                                <textarea
-                                    rows={4}
-                                    placeholder="Message *"
-                                    className="w-full px-4 py-3 border border-opinno-border rounded text-sm focus:outline-none focus:border-opinno-accent resize-none font-body"
-                                />
-                                <button type="submit" className="btn-primary self-center mt-2">
-                                    SEND
-                                </button>
-                            </form>
-                        </div>
+                        <HomeContactForm />
                     </div>
                 </div>
             </section>
 
         </div>
     )
+}
+
+// ===== HELPERS =====
+
+const DATE_LOCALES: Record<string, string> = { en: 'en-US', es: 'es-ES', it: 'it-IT' }
+
+function formatDate(dateStr: string | undefined, lang: string): string {
+    if (!dateStr) return ''
+    try {
+        return new Date(dateStr).toLocaleDateString(DATE_LOCALES[lang] || 'en-US', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        })
+    } catch {
+        return ''
+    }
 }
 
 // ===== REUSABLE COMPONENTS =====
