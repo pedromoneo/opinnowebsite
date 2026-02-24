@@ -84,20 +84,20 @@ export default function ManageUsers() {
         }
     }
 
-    const updateUserRole = async (emailId: string, newRole: string) => {
+    const updateUserRole = async (userId: string, newRole: string) => {
         try {
-            await setDoc(doc(db, 'users', emailId), { role: newRole }, { merge: true })
-            setUsers(users.map(u => u.email === emailId ? { ...u, role: newRole } : u))
+            await setDoc(doc(db, 'users', userId), { role: newRole }, { merge: true })
+            setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u))
         } catch (err: any) {
             alert(`Error updating user: ${err.message}`)
         }
     }
 
-    const deleteUserRecord = async (emailId: string) => {
+    const deleteUserRecord = async (userId: string) => {
         if (!confirm("Are you sure you want to remove this user's access completely?")) return
         try {
-            await deleteDoc(doc(db, 'users', emailId))
-            setUsers(users.filter(u => u.email !== emailId))
+            await deleteDoc(doc(db, 'users', userId))
+            setUsers(users.filter(u => u.id !== userId))
         } catch (err: any) {
             alert(`Error deleting user: ${err.message}`)
         }
@@ -210,8 +210,8 @@ export default function ManageUsers() {
                                             </span>
                                             <select
                                                 value={u.role}
-                                                onChange={(e) => updateUserRole(u.email, e.target.value)}
-                                                disabled={u.email === 'pedro.moneo@gmail.com'}
+                                                onChange={(e) => updateUserRole(u.id, e.target.value)}
+                                                disabled={u.email === 'pedro.moneo@gmail.com' || u.id === 'pedro.moneo@gmail.com'}
                                                 className="text-sm border border-gray-200 rounded px-2 py-1 bg-white focus:outline-none focus:border-opinno-accent"
                                             >
                                                 <option value="editor">Editor</option>
@@ -245,9 +245,9 @@ export default function ManageUsers() {
                                                 </button>
                                             )}
                                             <button
-                                                onClick={() => deleteUserRecord(u.email)}
+                                                onClick={() => deleteUserRecord(u.id)}
                                                 className="text-red-600 hover:text-red-900 disabled:opacity-30 disabled:hover:text-red-600"
-                                                disabled={u.email === 'pedro.moneo@gmail.com'}
+                                                disabled={u.email === 'pedro.moneo@gmail.com' || u.id === 'pedro.moneo@gmail.com'}
                                             >
                                                 Revoke Access
                                             </button>
