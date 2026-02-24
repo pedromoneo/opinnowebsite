@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 export default function VerifyOTP() {
     const { completeOTPLogin, user } = useAuth()
     const router = useRouter()
-    const [status, setStatus] = useState('Verifying login link...')
+    const [status, setStatus] = useState('Verifying OTP link...')
 
     useEffect(() => {
         if (user) {

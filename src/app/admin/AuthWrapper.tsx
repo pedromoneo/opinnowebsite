@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { AuthProvider, useAuth } from '@/lib/auth-context'
 
 function AuthCheck({ children }: { children: ReactNode }) {
@@ -80,31 +80,62 @@ function AuthCheck({ children }: { children: ReactNode }) {
 
 function AuthOTPForm() {
     const { loginWithOTP } = useAuth()
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [sent, setSent] = useState(false)
 
     return (
         <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
                 e.preventDefault()
+                setError(null)
+                setLoading(true)
                 const data = new FormData(e.currentTarget)
-                loginWithOTP(data.get('email') as string).then(() => {
-                    alert('Check your email for the login link!')
-                })
+                const email = data.get('email') as string
+                try {
+                    await loginWithOTP(email)
+                    setSent(true)
+                } catch (err: any) {
+                    setError(err.message)
+                } finally {
+                    setLoading(false)
+                }
             }}
             className="flex flex-col gap-3"
         >
-            <input
-                name="email"
-                type="email"
-                placeholder="pedro@opinno.com"
-                required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-opinno-accent focus:border-transparent outline-none transition-all"
-            />
-            <button
-                type="submit"
-                className="w-full bg-opinno-accent hover:bg-opinno-accent-hover text-white font-medium py-3 px-4 rounded-lg transition-colors"
-            >
-                Send Magic Link
-            </button>
+            {sent ? (
+                <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                    Check your email! We've sent a secure OTP link to your inbox.
+                </div>
+            ) : (
+                <>
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-lg text-xs font-medium">
+                            {error}
+                        </div>
+                    )}
+                    <input
+                        name="email"
+                        type="email"
+                        placeholder="pedro@opinno.com"
+                        required
+                        disabled={loading}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-opinno-accent focus:border-transparent outline-none transition-all disabled:opacity-50"
+                    />
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-opinno-accent hover:bg-opinno-accent-hover text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                        {loading ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                Sending...
+                            </>
+                        ) : 'Sign in with OTP'}
+                    </button>
+                </>
+            )}
         </form>
     )
 }

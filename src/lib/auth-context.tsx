@@ -113,11 +113,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const loginWithOTP = async (email: string) => {
-        const actionCodeSettings = {
-            url: window.location.origin + '/admin/login/verify',
-            handleCodeInApp: true,
-        };
-        await sendSignInLinkToEmail(auth, email, actionCodeSettings)
+        const res = await fetch('/api/login-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email,
+                hostUrl: window.location.origin
+            })
+        })
+
+        if (!res.ok) {
+            const err = await res.json()
+            throw new Error(err.details || err.error || 'Failed to send login link')
+        }
+
         window.localStorage.setItem('emailForSignIn', email)
     }
 
