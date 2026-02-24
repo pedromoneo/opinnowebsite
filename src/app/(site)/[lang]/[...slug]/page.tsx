@@ -50,7 +50,7 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
 
     // Strip WordPress block comments, literal \n escape sequences and markdown escapes
     const rawContent = postData.htmlContent || postData.content || ''
-    const finalContent = rawContent
+    let finalContent = rawContent
         .replace(/<!--[\s\S]*?-->/g, '')          // strip ALL HTML comments (wp block markers etc.)
         .replace(/\\\\n/g, '')                     // strip literal backslash-n sequences
         .replace(/\\\\_/g, '')                     // strip markdown escape: \_
@@ -59,6 +59,11 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
         .replace(/^\s*n+\s*(?=<)/g, '')            // remove stray 'n's at the start before an HTML tag
         .replace(/(?<=>)\s*n+\s*$/g, '')           // remove stray 'n's at the end after an HTML tag
         .trim()
+
+    // Remove leading <img> from content if we already show the featured image
+    if (postData.featuredImage) {
+        finalContent = finalContent.replace(/^\s*<img[^>]*\/?>\s*/i, '')
+    }
     let finalTitle = postData.title
 
     // Determine the breadcrumb based on category
@@ -75,76 +80,59 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
 
     return (
         <div className="min-h-[70vh] bg-white">
-            {/* Hero section */}
-            {postData.featuredImage && (
-                <div className="w-full h-[400px] relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={postData.featuredImage}
-                        alt={finalTitle}
-                        className="object-cover w-full h-full"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-                        <div className="container mx-auto max-w-4xl">
-                            {breadcrumb && (
-                                <Link
-                                    href={breadcrumb.href}
-                                    className="text-white/80 hover:text-white text-sm font-medium uppercase tracking-wider mb-3 inline-block transition-colors"
-                                >
-                                    ← {breadcrumb.label}
-                                </Link>
-                            )}
-                            <h1 className="text-3xl md:text-5xl font-display font-bold text-white leading-tight">
-                                {finalTitle}
-                            </h1>
-                            {postData.publishedAt && (
-                                <div className="text-white/70 mt-4 text-sm">
-                                    {new Date(postData.publishedAt).toLocaleDateString('en-US', {
-                                        year: 'numeric', month: 'long', day: 'numeric'
-                                    })}
-                                </div>
-                            )}
-                        </div>
+            <div className="container mx-auto px-6 max-w-4xl pt-10 pb-12">
+                {/* Featured image (contained, rounded) */}
+                {postData.featuredImage && (
+                    <div className="w-full aspect-video rounded-2xl overflow-hidden mb-8">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={postData.featuredImage}
+                            alt={finalTitle}
+                            className="object-cover w-full h-full"
+                        />
                     </div>
-                </div>
-            )}
-
-            {/* Content */}
-            <div className="container mx-auto px-6 max-w-4xl py-12">
-                {!postData.featuredImage && (
-                    <>
-                        {breadcrumb && (
-                            <Link
-                                href={breadcrumb.href}
-                                className="text-[#76A662] hover:text-[#5c8a4e] text-sm font-medium uppercase tracking-wider mb-4 inline-block transition-colors"
-                            >
-                                ← {breadcrumb.label}
-                            </Link>
-                        )}
-                        <h1 className="text-3xl md:text-5xl font-display font-bold mb-4 text-gray-900">
-                            {finalTitle}
-                        </h1>
-                        {postData.publishedAt && (
-                            <div className="text-gray-400 mb-8 text-sm">
-                                {new Date(postData.publishedAt).toLocaleDateString('en-US', {
-                                    year: 'numeric', month: 'long', day: 'numeric'
-                                })}
-                            </div>
-                        )}
-                        <div className="w-16 h-1 bg-[#76A662] rounded mb-8" />
-                    </>
                 )}
 
-                {/* Category badge */}
-                {category !== 'page' && (
-                    <div className="mb-8">
-                        <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold uppercase tracking-wider">
-                            {category}
+                {/* Breadcrumb */}
+                {breadcrumb && (
+                    <Link
+                        href={breadcrumb.href}
+                        className="text-[#76A662] hover:text-[#5c8a4e] text-sm font-semibold uppercase tracking-wider mb-3 inline-block transition-colors"
+                    >
+                        ← {breadcrumb.label}
+                    </Link>
+                )}
+
+                {/* Title */}
+                <h1 className="text-3xl md:text-5xl font-display font-extrabold text-[#0b2341] leading-tight mb-4 tracking-tight">
+                    {finalTitle}
+                </h1>
+
+                {/* Date + category badge */}
+                <div className="flex items-center gap-3 mb-2">
+                    {postData.publishedAt && (
+                        <span className="text-gray-400 text-sm">
+                            {new Date(postData.publishedAt).toLocaleDateString('en-US', {
+                                year: 'numeric', month: 'long', day: 'numeric'
+                            })}
                         </span>
-                    </div>
-                )}
+                    )}
+                    {category !== 'page' && (
+                        <>
+                            {postData.publishedAt && (
+                                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                            )}
+                            <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold uppercase tracking-wider">
+                                {category}
+                            </span>
+                        </>
+                    )}
+                </div>
 
+                {/* Accent bar */}
+                <div className="w-12 h-[3px] bg-[#76A662] rounded mt-6 mb-8" />
+
+                {/* Article content */}
                 {finalContent ? (
                     <div
                         className="prose prose-lg max-w-none text-gray-700 font-sans leading-relaxed

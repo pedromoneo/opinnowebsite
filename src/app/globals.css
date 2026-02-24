@@ -73,6 +73,37 @@
   }
 }
 
+@layer components {
+  /* Post article body — paragraph & list spacing */
+  .prose p {
+    margin-bottom: 1.5em;
+  }
+  .prose p:last-child {
+    margin-bottom: 0;
+  }
+  .prose ol,
+  .prose ul {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+  }
+  .prose li {
+    margin-bottom: 0.75em;
+  }
+  .prose li:last-child {
+    margin-bottom: 0;
+  }
+  .prose blockquote {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+  }
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    margin-top: 2em;
+    margin-bottom: 0.75em;
+  }
+}
+
 @layer utilities {
   .section-container {
     @apply mx-auto px-6 max-w-[1280px];
