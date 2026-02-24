@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { generatePostImages } from '@/lib/generate-images';
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -53,9 +54,21 @@ export async function POST(req: Request) {
 
         const timestamp = FieldValue.serverTimestamp();
 
+        // Auto-generate images if none provided
+        const hasImages = data.featuredImage || data.thumbnailUrl || data.bannerUrl;
+        let generatedImages: { featuredImage?: string; thumbnailUrl?: string; bannerUrl?: string } = {};
+        if (!hasImages && data.title) {
+            const contentType = type || data.type || 'post';
+            const images = await generatePostImages(data.title, data.excerpt, contentType);
+            if (images) {
+                generatedImages = images;
+            }
+        }
+
         // Prepare document data
         const docData = {
             ...data,
+            ...generatedImages,
             createdAt: data.createdAt || timestamp,
             updatedAt: timestamp,
             status: data.status || 'draft',
@@ -76,7 +89,8 @@ export async function POST(req: Request) {
             success: true,
             id: docRef.id,
             message: `Content published successfully to ${collectionName}`,
-            path: docRef.path
+            path: docRef.path,
+            imagesGenerated: Object.keys(generatedImages).length > 0,
         }, {
             headers: {
                 'Access-Control-Allow-Origin': '*',

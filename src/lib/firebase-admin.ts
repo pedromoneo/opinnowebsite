@@ -9,6 +9,7 @@ export function getAdminApp() {
     if (getApps().length > 0) return getApps()[0];
 
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 
     // 1. Try individual env variables first (production)
     let privateKey = (process.env.FIREBASE_ADMIN_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY)?.replace(/\\n/g, '\n');
@@ -31,6 +32,7 @@ export function getAdminApp() {
         try {
             return initializeApp({
                 credential: cert({ projectId, clientEmail, privateKey }),
+                storageBucket,
             });
         } catch (certErr) {
             console.warn('Firebase cert() failed, falling back to ADC:',
@@ -50,6 +52,7 @@ export function getAdminApp() {
         return initializeApp({
             credential: applicationDefault(),
             projectId,
+            storageBucket,
         });
     } catch (e) {
         throw new Error(
