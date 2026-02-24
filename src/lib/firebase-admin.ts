@@ -26,10 +26,16 @@ export function getAdminApp() {
         }
     }
 
-    if (privateKey && clientEmail && projectId) {
-        return initializeApp({
-            credential: cert({ projectId, clientEmail, privateKey }),
-        });
+    // Only attempt cert() if the key looks like a real PEM private key
+    if (privateKey && clientEmail && projectId && privateKey.includes('-----BEGIN')) {
+        try {
+            return initializeApp({
+                credential: cert({ projectId, clientEmail, privateKey }),
+            });
+        } catch (certErr) {
+            console.warn('Firebase cert() failed, falling back to ADC:',
+                certErr instanceof Error ? certErr.message : certErr);
+        }
     }
 
     // 2. Fall back to Application Default Credentials (Firebase CLI login)

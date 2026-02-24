@@ -75,9 +75,15 @@ export default function ManageUsers() {
             })
 
             if (!res.ok) {
-                const { error } = await res.json()
-                // Just log it or notify, but user is still in DB
-                showToast(`Warning: The user was granted access but the invite email failed to send: ${error}`, 'error')
+                let errorMsg = 'Unknown error'
+                try {
+                    const body = await res.json()
+                    errorMsg = body.error || body.details || errorMsg
+                } catch {
+                    errorMsg = `Server returned ${res.status}`
+                }
+                // User is already in DB, just warn about email
+                showToast(`User added but invite email failed: ${errorMsg}`, 'error')
             } else {
                 showToast(`Successfully invited ${safeEmail}`, 'success')
             }

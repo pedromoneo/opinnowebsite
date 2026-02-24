@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { getAdminApp } from '@/lib/firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
 
 export async function POST(req: Request) {
     try {
@@ -17,36 +14,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing email provider configuration.' }, { status: 500 });
         }
 
-        // Generate a Firebase magic sign-in link
-        let loginUrl = `${hostUrl}/admin`;
-        let adminConfigured = false;
-        try {
-            const adminApp = getAdminApp();
-            const adminAuth = getAuth(adminApp);
-            const db = getFirestore(adminApp);
+        const userRole = (role || 'editor').toUpperCase();
 
-            const actionCodeSettings = {
-                url: `${hostUrl}/admin/login/verify`,
-                handleCodeInApp: true,
-            };
-
-            loginUrl = await adminAuth.generateSignInWithEmailLink(email, actionCodeSettings);
-            adminConfigured = true;
-
-            // Create/Update user record in Firestore
-            const safeEmail = email.toLowerCase().trim();
-            await db.collection('users').doc(safeEmail).set({
-                email: safeEmail,
-                role: role || 'editor',
-                status: 'invited',
-                invitedAt: new Date().toISOString()
-            }, { merge: true });
-
-        } catch (adminErr: any) {
-            console.warn('Firebase Admin fallback:', adminErr.message);
-            loginUrl = `${hostUrl}/admin`;
-        }
-
+        // The client already creates the user record in Firestore.
+        // This route just sends the invitation email via Resend.
+        const loginUrl = `${hostUrl}/admin`;
         const resend = new Resend(resendApiKey);
 
         const { data, error } = await resend.emails.send({
@@ -60,20 +32,19 @@ export async function POST(req: Request) {
                     </div>
                     <h1 style="font-size: 24px; font-weight: 700; color: #0b2341; margin: 0 0 12px;">You've been invited</h1>
                     <p style="font-size: 16px; color: #4B5563; line-height: 1.6; margin: 0 0 24px;">
-                        You have been granted access to the Opinno Content Management System as an <strong>${role.toUpperCase()}</strong>.
-                        Click the button below to log in — no password needed.
+                        You have been granted access to the Opinno Content Management System as an <strong>${userRole}</strong>.
+                        Click the button below to sign in — no password needed.
                     </p>
                     <div style="margin: 32px 0;">
                         <a href="${loginUrl}" style="display: inline-block; background-color: #fca311; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px;">
-                            Sign in with OTP →
+                            Sign in to Opinno CMS →
                         </a>
                     </div>
-                    ${!adminConfigured ? `
-                    <p style="font-size: 13px; color: #DC2626; background: #FEF2F2; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
-                        <strong>Note:</strong> Admin credentials were not found. You may need to log in manually at the dashboard.
-                    </p>` : ''}
+                    <p style="font-size: 14px; color: #6B7280; line-height: 1.5; margin: 0 0 20px;">
+                        On the login page, enter your email address and click <strong>"Sign in with OTP"</strong> to receive a secure login link.
+                    </p>
                     <p style="font-size: 13px; color: #9CA3AF; line-height: 1.5; margin: 0;">
-                        This link expires in 24 hours. If you did not expect this invitation, you can safely ignore this email.
+                        If you did not expect this invitation, you can safely ignore this email.
                     </p>
                     <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;" />
                     <p style="font-size: 12px; color: #D1D5DB; margin: 0;">Opinno · opinno.com</p>
