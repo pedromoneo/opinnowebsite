@@ -79,7 +79,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, data });
+        // Strip complex properties to avoid Next.js JSON serialization crashes
+        return NextResponse.json({ success: true, id: data?.id });
 
     } catch (error: any) {
         console.error('Invite Error:', error);
