@@ -15,6 +15,15 @@ export default function ManageUsers() {
     const [inviteEmail, setInviteEmail] = useState('')
     const [inviteRole, setInviteRole] = useState('editor')
 
+    // Alert & Modal states
+    const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null })
+    const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' })
+
+    const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+        setToast({ show: true, message, type })
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000)
+    }
+
     const fetchUsers = async () => {
         try {
             const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'))
@@ -68,9 +77,9 @@ export default function ManageUsers() {
             if (!res.ok) {
                 const { error } = await res.json()
                 // Just log it or notify, but user is still in DB
-                alert(`Warning: The user was granted access but the invite email failed to send: ${error}`)
+                showToast(`Warning: The user was granted access but the invite email failed to send: ${error}`, 'error')
             } else {
-                alert(`Successfully invited ${safeEmail}`)
+                showToast(`Successfully invited ${safeEmail}`, 'success')
             }
 
             setInviteEmail('')
@@ -78,7 +87,7 @@ export default function ManageUsers() {
             fetchUsers()
 
         } catch (err: any) {
-            alert(`Error inviting user: ${err.message}`)
+            showToast(`Error inviting user: ${err.message}`, 'error')
         } finally {
             setInviting(false)
         }
@@ -88,18 +97,28 @@ export default function ManageUsers() {
         try {
             await setDoc(doc(db, 'users', userId), { role: newRole }, { merge: true })
             setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u))
+            showToast('User role updated successfully', 'success')
         } catch (err: any) {
-            alert(`Error updating user: ${err.message}`)
+            showToast(`Error updating user: ${err.message}`, 'error')
         }
     }
 
-    const deleteUserRecord = async (userId: string) => {
-        if (!confirm("Are you sure you want to remove this user's access completely?")) return
+    const confirmDeleteUser = (userId: string) => {
+        setConfirmModal({ isOpen: true, userId })
+    }
+
+    const executeDeleteUser = async () => {
+        const userId = confirmModal.userId
+        if (!userId) return
+
         try {
             await deleteDoc(doc(db, 'users', userId))
             setUsers(users.filter(u => u.id !== userId))
+            showToast('User access revoked', 'success')
         } catch (err: any) {
-            alert(`Error deleting user: ${err.message}`)
+            showToast(`Error deleting user: ${err.message}`, 'error')
+        } finally {
+            setConfirmModal({ isOpen: false, userId: null })
         }
     }
 
@@ -120,7 +139,42 @@ export default function ManageUsers() {
     }
 
     return (
-        <div className="flex flex-col gap-8 flex-1 w-full mx-auto max-w-5xl">
+        <div className="flex flex-col gap-8 flex-1 w-full mx-auto max-w-5xl relative">
+            {/* Custom Toast Notification */}
+            {toast.show && (
+                <div className={`fixed top-4 right-4 max-w-sm w-full z-50 p-4 rounded-lg shadow-lg border ${toast.type === 'success' ? 'bg-green-50 z border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
+                    } transition-all duration-300 ease-in-out flex items-start gap-3`}>
+                    <div className="flex-1 text-sm font-medium">{toast.message}</div>
+                    <button onClick={() => setToast(prev => ({ ...prev, show: false }))} className="text-gray-400 hover:text-gray-600">
+                        &times;
+                    </button>
+                </div>
+            )}
+
+            {/* Custom Confirm Modal */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Revoke Access</h3>
+                        <p className="text-gray-600 mb-6 font-medium">Are you sure you want to remove this user's access completely? They will no longer be able to log in to the CMS.</p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setConfirmModal({ isOpen: false, userId: null })}
+                                className="px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={executeDeleteUser}
+                                className="px-4 py-2 font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm"
+                            >
+                                Yes, Revoke
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <header className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-display font-bold text-opinno-primary tracking-tight">Manage Users</h1>
@@ -227,16 +281,18 @@ export default function ManageUsers() {
                                             {u.status === 'invited' && (
                                                 <button
                                                     onClick={async () => {
+                                                        const activeElement = document.activeElement as HTMLElement;
+                                                        if (activeElement) activeElement.blur();
                                                         try {
                                                             const res = await fetch('/api/invite-user', {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({ email: u.email, role: u.role, hostUrl: window.location.origin })
                                                             })
-                                                            if (!res.ok) alert(`Error sending: ${(await res.json()).error}`)
-                                                            else alert(`Invite resent to ${u.email}`)
+                                                            if (!res.ok) showToast(`Error sending: ${(await res.json()).error}`, 'error')
+                                                            else showToast(`Invite resent to ${u.email}`, 'success')
                                                         } catch (e: any) {
-                                                            alert(`Error: ${e.message}`)
+                                                            showToast(`Error: ${e.message}`, 'error')
                                                         }
                                                     }}
                                                     className="text-opinno-accent hover:text-opinno-accent-hover"
@@ -245,7 +301,7 @@ export default function ManageUsers() {
                                                 </button>
                                             )}
                                             <button
-                                                onClick={() => deleteUserRecord(u.id)}
+                                                onClick={() => confirmDeleteUser(u.id)}
                                                 className="text-red-600 hover:text-red-900 disabled:opacity-30 disabled:hover:text-red-600"
                                                 disabled={u.email === 'pedro.moneo@gmail.com' || u.id === 'pedro.moneo@gmail.com'}
                                             >
