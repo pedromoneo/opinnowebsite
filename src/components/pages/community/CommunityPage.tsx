@@ -2,6 +2,7 @@ import InteriorPageLayout from '@/components/InteriorPageLayout'
 import { getSidebar } from "@/lib/page-data"
 import { queryCollection } from '@/lib/firestore-server'
 import Link from 'next/link'
+import PaginatedGrid from '@/components/PaginatedGrid'
 
 interface CommunityPageProps {
     lang: string
@@ -65,6 +66,40 @@ function PlaceholderImage({ title }: { title: string }) {
     )
 }
 
+function CommunityCard({ item, lang }: { item: any; lang: string }) {
+    return (
+        <Link
+            href={`/${lang}/${item.slugPath}`}
+            className="group flex flex-col bg-white rounded-xl border border-opinno-border overflow-hidden card-hover"
+        >
+            <div className="relative h-[180px] bg-gray-100">
+                {item.featuredImage && item.featuredImage.startsWith('http') ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={item.featuredImage}
+                        alt={item.title}
+                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                    />
+                ) : (
+                    <PlaceholderImage title={item.title} />
+                )}
+            </div>
+            <div className="p-6">
+                <div className="text-xs text-opinno-gray font-body mb-2 uppercase tracking-wider">
+                    {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : ''}
+                </div>
+                <h3 className="text-lg font-bold font-display mb-3 group-hover:text-opinno-accent transition-colors line-clamp-2">
+                    {item.title}
+                </h3>
+                <p className="text-sm text-opinno-gray font-body leading-relaxed line-clamp-3">
+                    {item.excerpt}
+                </p>
+            </div>
+        </Link>
+    )
+}
+
 export default async function CommunityPage({ lang, section }: CommunityPageProps) {
     const content = COMMUNITY_CONTENT[section] || COMMUNITY_CONTENT.work
     const firestoreCategory = CATEGORY_MAP[section]
@@ -87,6 +122,10 @@ export default async function CommunityPage({ lang, section }: CommunityPageProp
         }
     }
 
+    const cards = posts.map((item: any) => (
+        <CommunityCard key={item.id} item={item} lang={lang} />
+    ))
+
     return (
         <InteriorPageLayout
             breadcrumb="Community"
@@ -100,45 +139,7 @@ export default async function CommunityPage({ lang, section }: CommunityPageProp
             </div>
 
             {posts.length > 0 ? (
-                <>
-                    <div className="mb-6 text-sm text-opinno-gray font-body">
-                        Found {posts.length} {section}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {posts.map((item: any) => (
-                            <Link
-                                key={item.id}
-                                href={`/${lang}/${item.slugPath}`}
-                                className="group flex flex-col bg-white rounded-xl border border-opinno-border overflow-hidden card-hover"
-                            >
-                                <div className="relative h-[180px] bg-gray-100">
-                                    {item.featuredImage && item.featuredImage.startsWith('http') ? (
-                                        /* eslint-disable-next-line @next/next/no-img-element */
-                                        <img
-                                            src={item.featuredImage}
-                                            alt={item.title}
-                                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <PlaceholderImage title={item.title} />
-                                    )}
-                                </div>
-                                <div className="p-6">
-                                    <div className="text-xs text-opinno-gray font-body mb-2 uppercase tracking-wider">
-                                        {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : ''}
-                                    </div>
-                                    <h3 className="text-lg font-bold font-display mb-3 group-hover:text-opinno-accent transition-colors line-clamp-2">
-                                        {item.title}
-                                    </h3>
-                                    <p className="text-sm text-opinno-gray font-body leading-relaxed line-clamp-3">
-                                        {item.excerpt}
-                                    </p>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </>
+                <PaginatedGrid items={cards} totalCount={posts.length} columns={2} label={section} />
             ) : (
                 <div className="space-y-6">
                     {content.items.map(item => (

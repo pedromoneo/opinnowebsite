@@ -2,6 +2,7 @@ import InteriorPageLayout from '@/components/InteriorPageLayout'
 import { getSidebar } from "@/lib/page-data"
 import { queryCollection } from '@/lib/firestore-server'
 import Link from 'next/link'
+import PaginatedGrid from '@/components/PaginatedGrid'
 
 interface StoriesPageProps {
     lang: string
@@ -16,6 +17,40 @@ function PlaceholderImage({ title }: { title: string }) {
                 {title?.charAt(0)?.toUpperCase() || 'O'}
             </span>
         </div>
+    )
+}
+
+function StoryCard({ story, lang }: { story: any; lang: string }) {
+    return (
+        <Link
+            href={`/${lang}/${story.slugPath}`}
+            className="group block"
+        >
+            <div className="relative h-[200px] rounded-lg overflow-hidden mb-4 bg-gray-100">
+                {story.featuredImage && story.featuredImage.startsWith('http') ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={story.featuredImage}
+                        alt={story.title}
+                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                    />
+                ) : (
+                    <PlaceholderImage title={story.title} />
+                )}
+            </div>
+            <div className="text-xs text-opinno-gray font-body mb-2">
+                {story.publishedAt
+                    ? new Date(story.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : ''}
+            </div>
+            <h3 className="text-base font-bold leading-snug mb-2 group-hover:text-opinno-accent transition-colors line-clamp-3">
+                {story.title}
+            </h3>
+            <p className="text-sm text-opinno-gray font-body leading-relaxed line-clamp-2">
+                {story.excerpt?.substring(0, 150)}...
+            </p>
+        </Link>
     )
 }
 
@@ -55,53 +90,19 @@ export default async function StoriesPage({ lang, category = 'all' }: StoriesPag
         }
     }
 
+    const cards = stories.map((story: any) => (
+        <StoryCard key={story.id} story={story} lang={lang} />
+    ))
+
     return (
         <InteriorPageLayout
             breadcrumb="News"
             title={getCategoryTitle()}
             sidebar={getSidebar("stories", lang)}
         >
-            <div className="mb-4 text-sm text-opinno-gray font-body">
-                Showing {stories.length} stories
-            </div>
-
-            {/* Grid of story cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {stories.map((story: any) => (
-                    <Link
-                        key={story.id}
-                        href={`/${lang}/${story.slugPath}`}
-                        className="group block"
-                    >
-                        <div className="relative h-[200px] rounded-lg overflow-hidden mb-4 bg-gray-100">
-                            {story.featuredImage && story.featuredImage.startsWith('http') ? (
-                                /* eslint-disable-next-line @next/next/no-img-element */
-                                <img
-                                    src={story.featuredImage}
-                                    alt={story.title}
-                                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                                    loading="lazy"
-                                />
-                            ) : (
-                                <PlaceholderImage title={story.title} />
-                            )}
-                        </div>
-                        <div className="text-xs text-opinno-gray font-body mb-2">
-                            {story.publishedAt
-                                ? new Date(story.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-                                : ''}
-                        </div>
-                        <h3 className="text-base font-bold leading-snug mb-2 group-hover:text-opinno-accent transition-colors line-clamp-3">
-                            {story.title}
-                        </h3>
-                        <p className="text-sm text-opinno-gray font-body leading-relaxed line-clamp-2">
-                            {story.excerpt?.substring(0, 150)}...
-                        </p>
-                    </Link>
-                ))}
-            </div>
-
-            {stories.length === 0 && (
+            {stories.length > 0 ? (
+                <PaginatedGrid items={cards} totalCount={stories.length} columns={3} label="stories" />
+            ) : (
                 <div className="text-center py-16 text-opinno-gray font-body">
                     <p className="text-lg mb-2">No stories found in this category.</p>
                     <p className="text-sm">Check back later for new content.</p>
