@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { queryCollection, getDocument } from '@/lib/firestore-server'
 import { isStaticPage, getStaticPageComponent } from '@/lib/static-page-router'
 import Link from 'next/link'
+import DownloadReportButton from '@/components/DownloadReportButton'
 
 export const dynamic = 'force-dynamic';
 
@@ -160,6 +161,15 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
                         dangerouslySetInnerHTML={{ __html: finalContent }}
                     />
                 ) : null}
+
+                {/* Download report button for publications */}
+                {postData.cmsCategory === 'publications' && postData.publicationUrl && (
+                    <DownloadReportButton
+                        postId={postData.id || docId}
+                        postTitle={finalTitle}
+                        lang={lang}
+                    />
+                )}
 
                 {/* Bottom navigation */}
                 {breadcrumb && (

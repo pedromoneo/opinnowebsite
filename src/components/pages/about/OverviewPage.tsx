@@ -6,7 +6,7 @@ export default function AboutOverviewPage({ lang }: { lang: string }) {
     return (
         <InteriorPageLayout
             breadcrumb={lang === 'es' ? 'Nosotros' : lang === 'it' ? 'Chi siamo' : 'About'}
-            title={lang === 'es' ? 'Nosotros' : lang === 'it' ? 'Chi siamo' : 'About'}
+            title={lang === 'es' ? 'Visión General' : lang === 'it' ? 'Panoramica' : 'Overview'}
             sidebar={getSidebar("about", lang)}
         >
             {/* Mission Statement */}

@@ -37,9 +37,34 @@ export default function InteriorPageLayout({ breadcrumb, title, sidebar, childre
             <section className="bg-opinno-light-bg min-h-[60vh]">
                 <div className="section-container py-12 md:py-16">
                     <div className="flex flex-col md:flex-row gap-12 md:gap-16">
-                        {/* Sidebar */}
+                        {/* Sidebar — horizontal scrolling tabs on mobile, vertical on desktop */}
                         <nav className="w-full md:w-[220px] flex-shrink-0">
-                            <ul className="space-y-1">
+                            {/* Mobile: horizontal scrolling tabs */}
+                            <div className="md:hidden overflow-x-auto -mx-6 px-6 scrollbar-hide">
+                                <div className="flex gap-2 pb-3 min-w-max">
+                                    {sidebar.map(item => {
+                                        const localizedHref = item.href.startsWith('http') ? item.href : `${activeLangPrefix}${item.href}`
+                                        const isActive = cleanPath === item.href || cleanPath === item.href + '/'
+                                        const hasActiveChild = item.children?.some(child =>
+                                            cleanPath === child.href || cleanPath === child.href + '/'
+                                        )
+                                        return (
+                                            <Link
+                                                key={item.href}
+                                                href={localizedHref}
+                                                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors border ${isActive || hasActiveChild
+                                                    ? 'bg-opinno-primary text-white border-opinno-primary'
+                                                    : 'text-opinno-gray border-gray-200 hover:border-opinno-primary hover:text-opinno-primary'
+                                                    }`}
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            {/* Desktop: vertical sidebar */}
+                            <ul className="hidden md:block space-y-1">
                                 {sidebar.map(item => {
                                     const localizedHref = item.href.startsWith('http') ? item.href : `${activeLangPrefix}${item.href}`
                                     const isActive = cleanPath === item.href || cleanPath === item.href + '/'

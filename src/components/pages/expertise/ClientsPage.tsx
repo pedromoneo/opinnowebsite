@@ -1,13 +1,17 @@
+'use client'
+
 import InteriorPageLayout from '@/components/InteriorPageLayout'
+import ClientLoginGate from '@/components/ClientLoginGate'
 import { getSidebar } from "@/lib/page-data"
 
 export default function ClientsPage({ lang }: { lang: string }) {
     return (
         <InteriorPageLayout
             breadcrumb={lang === 'es' ? 'Contacto' : lang === 'it' ? 'Contatto' : 'Expertise'}
-            title={lang === 'es' ? '¡Contrátanos!' : lang === 'it' ? 'Assumici!' : 'Hire us!'}
+            title={lang === 'es' ? 'Acceso Clientes' : lang === 'it' ? 'Accesso Clienti' : 'Client Login'}
             sidebar={getSidebar("expertise", lang)}
         >
+            <ClientLoginGate lang={lang}>
             <div className="mb-12">
                 <p className="text-xl md:text-2xl leading-relaxed text-opinno-primary mb-8">
                     {lang === 'es' ? 'Una plataforma global de expertos en innovación.' : lang === 'it' ? 'Una piattaforma globale di esperti in innovazione.' : 'A global platform of innovation experts.'}
@@ -72,6 +76,7 @@ export default function ClientsPage({ lang }: { lang: string }) {
                     <button type="submit" className="btn-primary" style={{ padding: '0.75rem 2rem', fontSize: '0.875rem' }}>{lang === 'es' ? 'ENVIAR' : lang === 'it' ? 'INVIA' : 'SUBMIT'}</button>
                 </form>
             </div>
+            </ClientLoginGate>
         </InteriorPageLayout>
     )
 }

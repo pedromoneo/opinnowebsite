@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40" fill="#232F3E">
+  <text x="0" y="30" font-family="'Amazon Ember', Arial, sans-serif" font-size="26" font-weight="bold" letter-spacing="2">AWS</text>
+  <path d="M0 35 Q50 42 100 35" fill="none" stroke="#FF9900" stroke-width="2.5"/>
+</svg>

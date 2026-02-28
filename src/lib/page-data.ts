@@ -177,13 +177,13 @@ export function getSidebar(type: string, lang: string) {
 
 // Partner logos data
 export const PARTNER_LOGOS = [
-    { name: 'MIT Technology Review', src: 'https://opinno.com/wp-content/uploads/2023/06/MIT-Technology-Review-Logo-1.png' },
-    { name: 'B Corp', src: 'https://opinno.com/wp-content/uploads/2023/06/B-corp-Logo-1.png' },
-    { name: 'Salesforce', src: 'https://opinno.com/wp-content/uploads/2023/06/Salesforce-Logo.png' },
-    { name: 'AWS', src: 'https://opinno.com/wp-content/uploads/2023/06/AWS-Logo-1.png' },
-    { name: 'Microsoft', src: 'https://opinno.com/wp-content/uploads/2023/06/Microsoft-Logo.png' },
-    { name: 'Workday', src: 'https://opinno.com/wp-content/uploads/2023/06/Workday-Logo.png' },
-    { name: 'Stripe', src: 'https://opinno.com/wp-content/uploads/2023/06/Stripe-Logo.png' },
+    { name: 'MIT Technology Review', src: '/assets/logos/mit-technology-review.svg' },
+    { name: 'B Corp', src: '/assets/logos/b-corp.svg' },
+    { name: 'Salesforce', src: '/assets/logos/salesforce.svg' },
+    { name: 'AWS', src: '/assets/logos/aws.svg' },
+    { name: 'Microsoft', src: '/assets/logos/microsoft.svg' },
+    { name: 'Workday', src: '/assets/logos/workday.svg' },
+    { name: 'Stripe', src: '/assets/logos/stripe.svg' },
 ]
 
 // Office locations for world map section

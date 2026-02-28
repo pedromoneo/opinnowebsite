@@ -26,6 +26,7 @@ type PostData = {
     wpTags: string[];
     thumbnailUrl?: string;
     headerUrl?: string;
+    publicationUrl?: string;
 }
 
 export default function PostEditor({ initialData, isNew = false }: { initialData?: PostData, isNew?: boolean }) {
@@ -50,7 +51,8 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
         publishedAt: initialData?.publishedAt || new Date().toISOString().split('T')[0],
         wpTags: initialData?.wpTags || [],
         thumbnailUrl: initialData?.thumbnailUrl || '',
-        headerUrl: initialData?.headerUrl || ''
+        headerUrl: initialData?.headerUrl || '',
+        publicationUrl: initialData?.publicationUrl || ''
     })
 
     const handleSave = async (e: FormEvent) => {
@@ -151,6 +153,25 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
         } catch (e: any) {
             alert(`Error deleting post: ${e.message}`)
             setSaving(false)
+        }
+    }
+
+    const [uploadingPublication, setUploadingPublication] = useState(false)
+
+    const handlePublicationUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploadingPublication(true)
+        try {
+            const fileRef = ref(storage, `publications/${Date.now()}_${file.name}`)
+            const uploadTask = await uploadBytesResumable(fileRef, file)
+            const downloadUrl = await getDownloadURL(uploadTask.ref)
+            setFormData(prev => ({ ...prev, publicationUrl: downloadUrl }))
+        } catch (err: any) {
+            alert(`Error uploading publication: ${err.message}`)
+        } finally {
+            setUploadingPublication(false)
         }
     }
 
@@ -282,6 +303,32 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
                                 </div>
                             ))}
                         </div>
+
+                        {/* Publication File Upload (only for publications category) */}
+                        {formData.cmsCategory === 'publications' && (
+                            <div className="pt-4 border-t border-gray-100">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Publication File (PDF)</label>
+                                <p className="text-xs text-gray-500 mb-3">Upload the report/publication file that clients can download.</p>
+                                {formData.publicationUrl ? (
+                                    <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                        <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span className="text-sm text-green-700 font-medium flex-1 truncate">File uploaded</span>
+                                        <a href={formData.publicationUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-green-600 hover:underline">Preview</a>
+                                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, publicationUrl: '' }))} className="text-xs text-red-500 hover:text-red-700 font-medium">Remove</button>
+                                    </div>
+                                ) : (
+                                    <label className={`flex flex-col items-center justify-center w-full py-8 border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer ${uploadingPublication ? 'opacity-50 pointer-events-none' : ''}`}>
+                                        <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                        </svg>
+                                        <span className="text-sm text-gray-500">{uploadingPublication ? 'Uploading...' : 'Click to upload PDF, DOC, or DOCX'}</span>
+                                        <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handlePublicationUpload} disabled={uploadingPublication} />
+                                    </label>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
