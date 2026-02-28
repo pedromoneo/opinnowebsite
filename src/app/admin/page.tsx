@@ -1,37 +1,65 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { collection, query, orderBy, limit, getDocs, getCountFromServer } from 'firebase/firestore'
+import { collection, query, orderBy, limit, getDocs, getCountFromServer, DocumentData, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import Link from 'next/link'
 
-type RecentItem = {
-    id: string
-    title: string
-    type: 'post' | 'page'
-    updatedAt?: string
-    publishedAt?: string
-    lang?: string
-    slug?: string
+/** Convert any date value (string, Firestore Timestamp, etc.) to milliseconds */
+function toMs(v: any): number {
+    if (!v) return 0;
+    if (typeof v?.toMillis === 'function') return v.toMillis();
+    if (typeof v?.toDate === 'function') return v.toDate().getTime();
+    if (v?.seconds) return v.seconds * 1000;
+    const d = new Date(v).getTime();
+    return isNaN(d) ? 0 : d;
 }
 
-function timeAgo(dateStr?: string): string {
-    if (!dateStr) return 'Unknown date'
-    const diff = Date.now() - new Date(dateStr).getTime()
-    const mins = Math.floor(diff / 60000)
-    if (mins < 1) return 'Just now'
-    if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`
-    const hours = Math.floor(mins / 60)
-    if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`
-    const days = Math.floor(hours / 24)
-    if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`
-    return new Date(dateStr).toLocaleDateString()
+const fmtDate = (v: any) => {
+    if (!v) return '-'
+    const d = typeof v?.toDate === 'function' ? v.toDate() : v?.seconds ? new Date(v.seconds * 1000) : new Date(v)
+    return d instanceof Date && !isNaN(d.getTime()) ? d.toLocaleDateString() : '-'
 }
 
 export default function AdminDashboard() {
-    const [recentItems, setRecentItems] = useState<RecentItem[]>([])
+    const [posts, setPosts] = useState<DocumentData[]>([])
     const [totalPosts, setTotalPosts] = useState<number | null>(null)
     const [loading, setLoading] = useState(true)
+    const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; postId: string | null; postTitle: string }>({
+        isOpen: false, postId: null, postTitle: ''
+    })
+    const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
+        show: false, message: '', type: 'success'
+    })
+
+    const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+        setToast({ show: true, message, type })
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000)
+    }
+
+    const handleStatusChange = async (postId: string, newStatus: string) => {
+        try {
+            await updateDoc(doc(db, 'content', postId), { status: newStatus })
+            setPosts(posts.map(p => p.id === postId ? { ...p, status: newStatus } : p))
+            showToast(`Status updated to ${newStatus}`)
+        } catch (err: any) {
+            showToast(`Error: ${err.message}`, 'error')
+        }
+    }
+
+    const executeDeletePost = async () => {
+        const postId = confirmModal.postId
+        if (!postId) return
+        try {
+            await deleteDoc(doc(db, 'content', postId))
+            setPosts(posts.filter(p => p.id !== postId))
+            showToast('Post deleted successfully')
+        } catch (err: any) {
+            showToast(`Error: ${err.message}`, 'error')
+        } finally {
+            setConfirmModal({ isOpen: false, postId: null, postTitle: '' })
+        }
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -40,38 +68,12 @@ export default function AdminDashboard() {
                 const countSnap = await getCountFromServer(collection(db, 'content'))
                 setTotalPosts(countSnap.data().count)
 
-                // Fetch recent posts (limited for display)
-                const postsSnap = await getDocs(query(collection(db, 'content'), limit(100)))
-                const posts: RecentItem[] = postsSnap.docs.map(doc => ({
-                    id: doc.id,
-                    type: 'post',
-                    title: doc.data().title || '(Untitled)',
-                    updatedAt: doc.data().updatedAt,
-                    publishedAt: doc.data().publishedAt,
-                    lang: doc.data().lang,
-                    slug: doc.data().slug,
-                }))
-
-                // Fetch recent pages
-                const pagesSnap = await getDocs(query(collection(db, 'pages'), limit(50)))
-                const pages: RecentItem[] = pagesSnap.docs.map(doc => ({
-                    id: doc.id,
-                    type: 'page',
-                    title: doc.data().title || '(Untitled)',
-                    updatedAt: doc.data().updatedAt,
-                    publishedAt: doc.data().publishedAt,
-                    lang: doc.data().lang,
-                    slug: doc.data().slug,
-                }))
-
-                // Merge and sort by most recently updated/published
-                const allItems = [...posts, ...pages].sort((a, b) => {
-                    const aDate = a.updatedAt || a.publishedAt || ''
-                    const bDate = b.updatedAt || b.publishedAt || ''
-                    return new Date(bDate).getTime() - new Date(aDate).getTime()
-                }).slice(0, 8)
-
-                setRecentItems(allItems)
+                // Fetch recent posts (same query as Posts page)
+                const q = query(collection(db, 'content'), orderBy('publishedAt', 'desc'), limit(100))
+                const snapshot = await getDocs(q)
+                const fetchedPosts: any[] = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+                fetchedPosts.sort((a, b) => toMs(b.publishedAt) - toMs(a.publishedAt))
+                setPosts(fetchedPosts)
             } catch (err) {
                 console.error('Error fetching dashboard data:', err)
             } finally {
@@ -83,6 +85,38 @@ export default function AdminDashboard() {
 
     return (
         <div className="flex flex-col gap-8 text-opinno-primary">
+            {/* Toast */}
+            {toast.show && (
+                <div className={`fixed top-4 right-4 max-w-xs w-full z-50 p-3 rounded-lg shadow-lg border text-sm font-medium ${
+                    toast.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
+                } transition-all duration-300 ease-in-out flex items-start gap-2`}>
+                    <div className="flex-1">{toast.message}</div>
+                    <button onClick={() => setToast(prev => ({ ...prev, show: false }))} className="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+                </div>
+            )}
+
+            {/* Delete modal */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Post</h3>
+                        <p className="text-gray-600 mb-6 text-sm">
+                            Are you sure you want to delete &ldquo;{confirmModal.postTitle}&rdquo;? This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button onClick={() => setConfirmModal({ isOpen: false, postId: null, postTitle: '' })}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200">
+                                Cancel
+                            </button>
+                            <button onClick={executeDeletePost}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm">
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <header>
                 <h1 className="text-3xl font-display font-bold text-opinno-primary tracking-tight">Dashboard Overview</h1>
                 <p className="text-gray-500 mt-2">Manage content across main, english, spanish and italian regional sites.</p>
@@ -107,39 +141,94 @@ export default function AdminDashboard() {
                 </Link>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                    <h2 className="text-lg font-bold font-display m-0">Recent Activity</h2>
+            {/* Recent Posts Table — same configuration as /admin/posts */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                    <h2 className="text-lg font-bold font-display m-0">Recent Posts</h2>
                     <Link href="/admin/posts" className="text-sm text-opinno-accent font-medium hover:underline">View All Posts</Link>
                 </div>
-                <div className="p-0">
-                    {loading ? (
-                        <div className="p-8 text-center text-gray-400 text-sm">Loading recent activity...</div>
-                    ) : recentItems.length === 0 ? (
-                        <div className="p-8 text-center text-gray-400 text-sm">No content yet. Create your first post!</div>
-                    ) : recentItems.map((item) => (
-                        <Link
-                            key={item.id}
-                            href={`/admin/${item.type === 'post' ? 'posts' : 'pages'}/${item.id}`}
-                            className="flex items-center justify-between p-5 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors"
-                        >
-                            <div className="flex items-start gap-3">
-                                <span className={`mt-0.5 flex-shrink-0 w-2 h-2 rounded-full ${item.type === 'post' ? 'bg-opinno-accent' : 'bg-purple-400'}`} />
-                                <div className="flex flex-col">
-                                    <span className="font-medium text-[#1F2A38] text-sm leading-tight">{item.title}</span>
-                                    <span className="text-xs text-gray-400 mt-1">
-                                        {item.type === 'post' ? 'Post' : 'Page'} · {item.lang?.toUpperCase() || 'EN'} · {timeAgo(item.updatedAt || item.publishedAt)}
-                                    </span>
-                                </div>
-                            </div>
-                            <span className={`flex-shrink-0 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${item.type === 'post'
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'bg-purple-50 text-purple-600'
-                                }`}>
-                                {item.type}
-                            </span>
-                        </Link>
-                    ))}
+
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Lang</th>
+                                <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Category</th>
+                                <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Date</th>
+                                <th className="px-3 py-2.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-100">
+                            {loading ? (
+                                <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-500">Loading posts...</td></tr>
+                            ) : posts.length === 0 ? (
+                                <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-500">No posts found.</td></tr>
+                            ) : posts.map((post) => (
+                                <tr key={post.id} className="hover:bg-gray-50/50 transition-colors">
+                                    <td className="px-4 py-3 max-w-[260px]">
+                                        <div className="font-medium text-gray-900 truncate">{post.title}</div>
+                                        <div className="text-xs text-gray-400 truncate">/{post.lang}/{post.slug}</div>
+                                    </td>
+                                    <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
+                                        <span className="px-1.5 py-0.5 text-xs font-semibold rounded bg-gray-100 text-gray-700 uppercase">{post.lang || 'en'}</span>
+                                    </td>
+                                    <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
+                                        <span className="text-gray-600 capitalize text-xs">{post.cmsCategory || post.subCategory || post.category || '-'}</span>
+                                    </td>
+                                    <td className="px-3 py-3 whitespace-nowrap">
+                                        <select
+                                            value={post.status || 'published'}
+                                            onChange={(e) => handleStatusChange(post.id, e.target.value)}
+                                            className={`text-xs border rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-opinno-accent cursor-pointer ${
+                                                post.status === 'draft' ? 'border-amber-300 text-amber-700'
+                                                    : post.status === 'featured' ? 'border-purple-300 text-purple-700'
+                                                    : 'border-green-300 text-green-700'
+                                            }`}
+                                        >
+                                            <option value="draft">Draft</option>
+                                            <option value="published">Published</option>
+                                            <option value="featured">Featured</option>
+                                        </select>
+                                    </td>
+                                    <td className="px-3 py-3 whitespace-nowrap text-gray-500 text-xs hidden sm:table-cell">
+                                        {fmtDate(post.publishedAt)}
+                                    </td>
+                                    <td className="px-3 py-3 whitespace-nowrap text-right">
+                                        <div className="flex items-center justify-end gap-1">
+                                            {/* View */}
+                                            <a href={`https://opinnowebsite.web.app/${post.lang || 'en'}/${post.slug}`}
+                                                target="_blank" rel="noopener noreferrer"
+                                                className="p-1.5 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                title="View on site">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                                                </svg>
+                                            </a>
+                                            {/* Edit */}
+                                            <Link href={`/admin/posts/${post.id}`}
+                                                className="p-1.5 rounded-md text-gray-400 hover:text-opinno-accent hover:bg-opinno-accent/5 transition-colors"
+                                                title="Edit post">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                                </svg>
+                                            </Link>
+                                            {/* Delete */}
+                                            <button
+                                                onClick={() => setConfirmModal({ isOpen: true, postId: post.id, postTitle: post.title })}
+                                                className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                title="Delete post">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

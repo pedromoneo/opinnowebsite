@@ -21,7 +21,7 @@ export const STATIC_PAGE_SLUGS = new Set([
     'stories/press-releases',
     'stories/press',
     'insights',
-    'insights/articles',
+    'insights/insights',
     'insights/voices',
     'insights/publications',
     'insights/conferences',

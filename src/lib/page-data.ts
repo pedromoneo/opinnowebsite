@@ -39,7 +39,7 @@ export function getSidebar(type: string, lang: string) {
             ],
             insights: [
                 { label: 'All', href: '/insights' },
-                { label: 'Articles', href: '/insights/articles' },
+                { label: 'Insights', href: '/insights/insights' },
                 { label: 'Voices', href: '/insights/voices' },
                 { label: 'Publications', href: '/insights/publications' },
                 { label: 'Conferences', href: '/insights/conferences' },
@@ -95,7 +95,7 @@ export function getSidebar(type: string, lang: string) {
             ],
             insights: [
                 { label: 'Todos', href: '/insights' },
-                { label: 'Artículos', href: '/insights/articles' },
+                { label: 'Insights', href: '/insights/insights' },
                 { label: 'Voces', href: '/insights/voices' },
                 { label: 'Publicaciones', href: '/insights/publications' },
                 { label: 'Conferencias', href: '/insights/conferences' },
@@ -151,7 +151,7 @@ export function getSidebar(type: string, lang: string) {
             ],
             insights: [
                 { label: 'Tutti', href: '/insights' },
-                { label: 'Articoli', href: '/insights/articles' },
+                { label: 'Insights', href: '/insights/insights' },
                 { label: 'Voci', href: '/insights/voices' },
                 { label: 'Pubblicazioni', href: '/insights/publications' },
                 { label: 'Conferenze', href: '/insights/conferences' },

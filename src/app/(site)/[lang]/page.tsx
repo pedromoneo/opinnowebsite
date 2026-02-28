@@ -102,7 +102,7 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
             { field: 'category', op: '==', value: 'story' },
             { field: 'lang', op: '==', value: lang },
         ]))
-            .filter(p => p.title)
+            .filter(p => p.title && p.status !== 'draft')
             .sort((a, b) => {
                 const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
                 const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0
@@ -114,11 +114,19 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
 
         if (latestNews.length === 0) latestNews = allStories.slice(4, 8) // fallback if none tagged
 
-        latestInsights = (await queryCollection('content', [
-            { field: 'category', op: '==', value: 'insight' },
-            { field: 'lang', op: '==', value: lang },
-        ]))
-            .filter(p => p.title)
+        // Query both 'insights' (new) and 'insight' (legacy) for backward compatibility
+        const [insightsNew, insightsLegacy] = await Promise.all([
+            queryCollection('content', [
+                { field: 'category', op: '==', value: 'insights' },
+                { field: 'lang', op: '==', value: lang },
+            ]),
+            queryCollection('content', [
+                { field: 'category', op: '==', value: 'insight' },
+                { field: 'lang', op: '==', value: lang },
+            ]),
+        ])
+        latestInsights = [...insightsNew, ...insightsLegacy]
+            .filter(p => p.title && p.status !== 'draft')
             .sort((a, b) => {
                 const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
                 const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0

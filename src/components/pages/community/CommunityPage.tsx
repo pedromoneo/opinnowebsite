@@ -111,7 +111,7 @@ export default async function CommunityPage({ lang, section }: CommunityPageProp
             posts = (await queryCollection('content', [
                 { field: 'category', op: '==', value: firestoreCategory },
             ]))
-                .filter((p: any) => p.title)
+                .filter((p: any) => p.title && p.status !== 'draft')
                 .sort((a: any, b: any) => {
                     const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
                     const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0

@@ -1,7 +1,72 @@
 import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
 import { generatePostImages } from '@/lib/generate-images';
+import { GoogleGenAI } from '@google/genai';
+
+/**
+ * Generate a LinkedIn-optimized social post using Gemini AI.
+ * Returns the post text or null if generation fails (non-blocking).
+ */
+async function generateSocialPost(
+    title: string,
+    excerpt: string | undefined,
+    content: string | undefined,
+    lang: string,
+    postUrl: string,
+): Promise<string | null> {
+    try {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            console.warn('GEMINI_API_KEY not set — skipping social post generation.');
+            return null;
+        }
+
+        const ai = new GoogleGenAI({ apiKey });
+
+        // Use excerpt or first 2000 chars of content for context
+        const contentSnippet = excerpt || (content ? content.replace(/<[^>]*>?/gm, ' ').substring(0, 2000) : '');
+
+        const langInstructions = lang === 'es'
+            ? 'Write the post in Spanish.'
+            : lang === 'it'
+                ? 'Write the post in Italian.'
+                : 'Write the post in English.';
+
+        const prompt = `
+You are a social media expert for Opinno, a global innovation consultancy.
+Generate a LinkedIn post for the following article.
+
+GUIDELINES:
+1. Professional, engaging tone that matches LinkedIn best practices.
+2. Start with a hook — a provocative question, bold statement, or surprising insight.
+3. Keep it concise: 150-250 words max.
+4. Use short paragraphs and line breaks for readability.
+5. Include 3-5 relevant hashtags at the end (e.g., #Innovation #Technology #Strategy).
+6. Do NOT include the article link — it will be added automatically.
+7. Do NOT use markdown formatting, emojis in excess, or clickbait language.
+8. ${langInstructions}
+
+ARTICLE TITLE: ${title}
+ARTICLE SUMMARY: ${contentSnippet}
+
+Return ONLY the social post text. No quotes, no labels, no extra formatting.
+`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        });
+
+        const text = response.text?.trim();
+        if (text && text.length > 20) {
+            return text;
+        }
+        return null;
+    } catch (error: any) {
+        console.error('Social post generation failed (non-blocking):', error.message);
+        return null;
+    }
+}
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -52,7 +117,13 @@ export async function POST(req: Request) {
             ? db.collection(collectionName).doc(docId)
             : db.collection(collectionName).doc();
 
-        const timestamp = FieldValue.serverTimestamp();
+        const nowISO = new Date().toISOString();
+
+        // Normalize field names: accept "body" or "content" for HTML content
+        if (data.body && !data.content) {
+            data.content = data.body;
+            delete data.body;
+        }
 
         // Auto-generate images if none provided
         const hasImages = data.featuredImage || data.thumbnailUrl || data.bannerUrl;
@@ -65,21 +136,76 @@ export async function POST(req: Request) {
             }
         }
 
-        // Prepare document data
+        // Generate social post for LinkedIn (non-blocking — won't fail the publish)
+        let socialPosts: Record<string, string> = {};
+        if (data.socialPosts?.linkedin) {
+            // If the caller already provides a social post, use it
+            socialPosts = data.socialPosts;
+        } else if (data.title) {
+            const postLang = data.lang || 'en';
+            // Build a preliminary URL for context (exact URL assembled after slugPath derivation)
+            const linkedinPost = await generateSocialPost(
+                data.title,
+                data.excerpt,
+                data.content || data.htmlContent,
+                postLang,
+                '', // URL not needed in prompt — will be added by feed consumer
+            );
+            if (linkedinPost) {
+                socialPosts = { linkedin: linkedinPost };
+            }
+        }
+
+        // Derive category, subCategory, and slugPath from cmsCategory
+        // Always derive internal category from cmsCategory — never trust raw data.category
+        // as it may contain CMS display names (e.g. 'article') that don't match internal values
+        const cmsCategory = (data.cmsCategory || data.category || 'insights').toLowerCase();
+
+        let derivedCategory: string;
+        if (cmsCategory === 'news' || cmsCategory === 'impact stories' || cmsCategory === 'press releases') {
+            derivedCategory = 'story';
+        } else {
+            // 'insights', 'article', 'voices', 'publications' all map to 'insights'
+            derivedCategory = 'insights';
+        }
+
+        let derivedSubCategory: string;
+        if (cmsCategory === 'news') {
+            derivedSubCategory = 'news';
+        } else if (cmsCategory === 'impact stories') {
+            derivedSubCategory = 'impact';
+        } else if (cmsCategory === 'press releases') {
+            derivedSubCategory = 'press-releases';
+        } else if (cmsCategory === 'voices') {
+            derivedSubCategory = 'voices';
+        } else if (cmsCategory === 'publications') {
+            derivedSubCategory = 'publications';
+        } else {
+            // 'insights', 'article', or any other defaults to 'insights'
+            derivedSubCategory = 'insights';
+        }
+
+        let derivedSlugPath = data.slugPath;
+        if (!derivedSlugPath && data.slug) {
+            const slug = data.slug.split('/').pop();
+            derivedSlugPath = derivedCategory === 'story' ? `story/${slug}` : `insights/${slug}`;
+        }
+
+        // Prepare document data with normalized fields
         const docData = {
             ...data,
             ...generatedImages,
-            createdAt: data.createdAt || timestamp,
-            updatedAt: timestamp,
-            status: data.status || 'draft',
-            // Default type to provided type or data.type or 'post'
+            createdAt: data.createdAt || nowISO,
+            updatedAt: nowISO,
+            publishedAt: data.publishedAt || nowISO,
+            status: data.status || 'published',
             type: type || data.type || 'post',
+            cmsCategory: cmsCategory,
+            category: derivedCategory,
+            subCategory: derivedSubCategory,
+            ...(derivedSlugPath ? { slugPath: derivedSlugPath } : {}),
+            ...(Object.keys(socialPosts).length > 0 ? { socialPosts } : {}),
         };
-
-        // If publishedAt is not provided, use timestamp
-        if (!docData.publishedAt) {
-            docData.publishedAt = timestamp;
-        }
 
         await docRef.set(docData, { merge: true });
 
@@ -91,6 +217,7 @@ export async function POST(req: Request) {
             message: `Content published successfully to ${collectionName}`,
             path: docRef.path,
             imagesGenerated: Object.keys(generatedImages).length > 0,
+            socialPostGenerated: Object.keys(socialPosts).length > 0,
         }, {
             headers: {
                 'Access-Control-Allow-Origin': '*',

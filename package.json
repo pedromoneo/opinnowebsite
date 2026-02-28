@@ -12,6 +12,7 @@
     "@google/genai": "^1.42.0",
     "@google/generative-ai": "^0.24.1",
     "@tailwindcss/forms": "^0.5.11",
+    "@types/rss": "^0.0.32",
     "axios": "^1.13.5",
     "cheerio": "^1.2.0",
     "date-fns": "^4.1.0",
@@ -27,7 +28,8 @@
     "react-markdown": "^10.1.0",
     "react-quill-new": "^3.8.3",
     "remark-gfm": "^4.0.1",
-    "resend": "^6.9.2"
+    "resend": "^6.9.2",
+    "rss": "^1.2.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

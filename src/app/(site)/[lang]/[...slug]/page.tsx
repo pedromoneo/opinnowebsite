@@ -71,6 +71,7 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
     const category = postData.category || 'page'
     const categoryLabels: Record<string, { label: string; href: string }> = {
         story: { label: 'Stories', href: `/${lang}/stories` },
+        insights: { label: 'Insights', href: `/${lang}/insights` },
         insight: { label: 'Insights', href: `/${lang}/insights` },
         challenge: { label: 'Challenges', href: `/${lang}/challenges` },
         event: { label: 'Events', href: `/${lang}/events` },
@@ -124,7 +125,12 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
                                 <span className="w-1 h-1 rounded-full bg-gray-300" />
                             )}
                             <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold uppercase tracking-wider">
-                                {category}
+                                {postData.cmsCategory === 'impact stories' ? 'Impact Stories'
+                                    : postData.cmsCategory === 'news' ? 'News'
+                                    : postData.cmsCategory === 'voices' ? 'Voices'
+                                    : postData.cmsCategory === 'publications' ? 'Publications'
+                                    : category === 'story' ? 'Impact Stories'
+                                    : 'Insights'}
                             </span>
                         </>
                     )}
@@ -140,7 +146,17 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
                             prose-headings:font-display prose-headings:text-gray-900
                             prose-a:text-[#76A662] prose-a:no-underline hover:prose-a:underline
                             prose-strong:text-gray-900
-                            prose-img:rounded-xl prose-img:shadow-md"
+                            prose-img:rounded-xl prose-img:shadow-md
+                            overflow-hidden break-words
+                            [overflow-wrap:break-word] [word-break:break-word]
+                            [&_img]:max-w-full [&_img]:h-auto
+                            [&_iframe]:max-w-full [&_iframe]:w-full
+                            [&_table]:max-w-full [&_table]:overflow-x-auto [&_table]:block
+                            [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap
+                            [&>*]:max-w-full
+                            [&_p]:max-w-full [&_p]:[overflow-wrap:break-word]
+                            [&_div]:max-w-full [&_span]:max-w-full
+                            [&_*]:max-w-full"
                         dangerouslySetInnerHTML={{ __html: finalContent }}
                     />
                 ) : null}

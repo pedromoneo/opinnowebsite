@@ -70,7 +70,7 @@ export default async function StoriesPage({ lang, category = 'all' }: StoriesPag
             ]
 
         stories = (await queryCollection('content', filters))
-            .filter((p: any) => p.title)
+            .filter((p: any) => p.title && p.status !== 'draft')
             .sort((a: any, b: any) => {
                 const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
                 const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0
@@ -86,7 +86,7 @@ export default async function StoriesPage({ lang, category = 'all' }: StoriesPag
             case 'news': return 'News'
             case 'press-releases': return 'Press Releases'
             case 'press': return 'Press'
-            default: return 'Stories'
+            default: return 'All'
         }
     }
 
@@ -96,7 +96,7 @@ export default async function StoriesPage({ lang, category = 'all' }: StoriesPag
 
     return (
         <InteriorPageLayout
-            breadcrumb="News"
+            breadcrumb="Stories"
             title={getCategoryTitle()}
             sidebar={getSidebar("stories", lang)}
         >

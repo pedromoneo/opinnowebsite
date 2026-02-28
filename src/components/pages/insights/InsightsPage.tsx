@@ -41,7 +41,9 @@ function InsightCard({ item, lang }: { item: any; lang: string }) {
             </div>
             <div className="flex items-center gap-2 mb-2">
                 <span className="text-[10px] uppercase tracking-wider text-white bg-opinno-accent/80 px-2 py-0.5 rounded-full font-body">
-                    {item.category === 'insight' ? 'Insight' : 'Story'}
+                    {item.cmsCategory === 'voices' ? 'Voices'
+                        : item.cmsCategory === 'publications' ? 'Publications'
+                        : 'Insights'}
                 </span>
                 <span className="text-xs text-opinno-gray font-body">
                     {item.publishedAt
@@ -66,27 +68,36 @@ export default async function InsightsPage({ lang, category = 'all' }: InsightsP
         let allDocs: any[] = []
 
         if (category === 'all') {
-            const [insightDocs, storyDocs] = await Promise.all([
+            // Insights section: only insights-category posts (NOT stories)
+            const [insightsNew, insightsLegacy] = await Promise.all([
+                queryCollection('content', [
+                    { field: 'category', op: '==', value: 'insights' },
+                    { field: 'lang', op: '==', value: lang },
+                ]),
                 queryCollection('content', [
                     { field: 'category', op: '==', value: 'insight' },
                     { field: 'lang', op: '==', value: lang },
                 ]),
+            ])
+            allDocs = [...insightsNew, ...insightsLegacy]
+        } else {
+            const [catNew, catLegacy] = await Promise.all([
                 queryCollection('content', [
-                    { field: 'category', op: '==', value: 'story' },
+                    { field: 'category', op: '==', value: 'insights' },
+                    { field: 'subCategory', op: '==', value: category },
+                    { field: 'lang', op: '==', value: lang },
+                ]),
+                queryCollection('content', [
+                    { field: 'category', op: '==', value: 'insight' },
+                    { field: 'subCategory', op: '==', value: category },
                     { field: 'lang', op: '==', value: lang },
                 ]),
             ])
-            allDocs = [...insightDocs, ...storyDocs]
-        } else {
-            allDocs = await queryCollection('content', [
-                { field: 'category', op: '==', value: 'insight' },
-                { field: 'subCategory', op: '==', value: category },
-                { field: 'lang', op: '==', value: lang },
-            ])
+            allDocs = [...catNew, ...catLegacy]
         }
 
         insights = allDocs
-            .filter((p: any) => p.title)
+            .filter((p: any) => p.title && p.status !== 'draft')
             .sort((a: any, b: any) => {
                 const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
                 const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0
@@ -98,11 +109,11 @@ export default async function InsightsPage({ lang, category = 'all' }: InsightsP
 
     const getCategoryTitle = () => {
         switch (category) {
-            case 'articles': return 'Articles'
+            case 'insights': return 'Insights'
             case 'voices': return 'Voices'
             case 'publications': return 'Publications'
             case 'conferences': return 'Conferences'
-            default: return 'Insights & Stories'
+            default: return 'All'
         }
     }
 

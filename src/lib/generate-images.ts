@@ -4,8 +4,8 @@
  */
 import { GoogleGenAI } from '@google/genai';
 
-// Configurable via env — default to Imagen 3, can switch to newer models
-const IMAGE_MODEL = process.env.IMAGE_MODEL || 'imagen-3.0-generate-002';
+// Configurable via env — tries models in order of preference
+const IMAGE_MODELS = (process.env.IMAGE_MODEL || 'imagen-4.0-fast-generate-001,imagen-3.0-generate-002,imagen-3.0-generate-001').split(',');
 
 interface GeneratedImages {
     featuredImage: string;
@@ -30,21 +30,30 @@ export async function generatePostImages(
 
     try {
         const prompt = buildPrompt(title, excerpt, type);
-        console.log(`Generating image for: "${title}" using model ${IMAGE_MODEL}`);
-
         const ai = new GoogleGenAI({ apiKey });
-        const response = await ai.models.generateImages({
-            model: IMAGE_MODEL,
-            prompt,
-            config: {
-                numberOfImages: 1,
-                aspectRatio: '16:9',
-            },
-        });
 
-        const imageBytes = response?.generatedImages?.[0]?.image?.imageBytes;
+        // Try each model until one succeeds
+        let imageBytes: string | undefined;
+        for (const model of IMAGE_MODELS) {
+            try {
+                console.log(`Generating image for: "${title}" using model ${model}`);
+                const response = await ai.models.generateImages({
+                    model: model.trim(),
+                    prompt,
+                    config: {
+                        numberOfImages: 1,
+                        aspectRatio: '16:9',
+                    },
+                });
+                imageBytes = response?.generatedImages?.[0]?.image?.imageBytes;
+                if (imageBytes) break;
+            } catch (modelErr) {
+                console.warn(`Model ${model} failed, trying next:`, modelErr instanceof Error ? modelErr.message : modelErr);
+            }
+        }
+
         if (!imageBytes) {
-            console.warn('Image generation returned no image data');
+            console.warn('Image generation returned no image data from any model');
             return null;
         }
 
@@ -76,7 +85,7 @@ function buildPrompt(title: string, excerpt?: string, type?: string): string {
         ? 'documentary photography style, authentic, human-centric'
         : 'modern corporate editorial style, clean, professional';
 
-    return `Professional high-quality editorial photograph for a corporate innovation blog post titled "${title}".${context} Style: ${style}. The image should be visually compelling with subtle technology and innovation themes. No text overlay, no watermarks, no logos. Photorealistic, well-lit, balanced composition.`;
+    return `Professional high-quality editorial photograph for a corporate innovation blog post titled "${title}".${context} Style: ${style}. The image should be visually compelling with subtle technology and innovation themes. IMPORTANT: Do not include any text, words, letters, numbers, captions, titles, labels, watermarks, or logos anywhere in the image. The image must be purely visual with no text of any kind. Photorealistic, well-lit, balanced composition.`;
 }
 
 async function uploadToStorage(imageBuffer: Buffer, path: string): Promise<string> {

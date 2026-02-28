@@ -41,6 +41,11 @@ export function getAdminApp() {
     }
 
     // 2. Fall back to Application Default Credentials (Firebase CLI login)
+    // If GOOGLE_APPLICATION_CREDENTIALS points to a non-existent file (e.g. local path
+    // deployed to Cloud Run), clear it so applicationDefault() uses the metadata server
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS && !existsSync(process.env.GOOGLE_APPLICATION_CREDENTIALS)) {
+        delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    }
     if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
         const adcPath = join(homedir(), '.config', 'firebase', `${(process.env.FIREBASE_AUTH_EMAIL || 'pedro_moneo_gmail.com').replace(/[@.]/g, '_')}_application_default_credentials.json`);
         if (existsSync(adcPath)) {

@@ -17,9 +17,23 @@ export function middleware(request: NextRequest) {
         pathname.startsWith('/_next') ||
         pathname.includes('.') ||
         pathname.startsWith('/api') ||
-        pathname.startsWith('/admin')
+        pathname.startsWith('/admin') ||
+        pathname.startsWith('/feed')
     ) {
         return NextResponse.next()
+    }
+
+    // Rewrite /{lang}/feed and /{lang}/feed/social to internal feed routes
+    const feedMatch = pathname.match(/^\/(en|es|it|de|fr|pt|ja|zh)\/(feed(?:\/social)?)$/)
+    if (feedMatch) {
+        const lang = feedMatch[1]
+        const feedPath = feedMatch[2]
+        const url = request.nextUrl.clone()
+        url.pathname = `/${feedPath}`
+        url.searchParams.set('lang', lang)
+        const response = NextResponse.rewrite(url)
+        response.headers.set('x-feed-lang', lang)
+        return response
     }
 
     // Check if there is any supported locale in the pathname
@@ -59,6 +73,6 @@ export const config = {
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
          */
-        '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        '/((?!api|feed|_next/static|_next/image|favicon.ico).*)',
     ],
 }

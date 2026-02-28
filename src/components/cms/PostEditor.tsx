@@ -10,7 +10,7 @@ import 'react-quill-new/dist/quill.snow.css'
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false, loading: () => <p>Loading editor...</p> })
 
-const VALID_CATEGORIES = ['article', 'voices', 'publications', 'impact stories', 'news'] as const;
+const VALID_CATEGORIES = ['insights', 'voices', 'publications', 'impact stories', 'news', 'press releases'] as const;
 type CMSCategory = typeof VALID_CATEGORIES[number];
 
 type PostData = {
@@ -25,7 +25,6 @@ type PostData = {
     publishedAt: string;
     wpTags: string[];
     thumbnailUrl?: string;
-    bannerUrl?: string;
     headerUrl?: string;
 }
 
@@ -35,7 +34,9 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
     const [generatingTags, setGeneratingTags] = useState(false)
     const [showHtml, setShowHtml] = useState(false)
 
-    const mappedCategory = initialData?.cmsCategory?.toLowerCase() as CMSCategory || ''
+    // Map legacy 'article' cmsCategory to 'insights'
+    const rawCategory = initialData?.cmsCategory?.toLowerCase() || ''
+    const mappedCategory = (rawCategory === 'article' ? 'insights' : rawCategory) as CMSCategory
 
     const [formData, setFormData] = useState<PostData>({
         id: initialData?.id || '',
@@ -49,7 +50,6 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
         publishedAt: initialData?.publishedAt || new Date().toISOString().split('T')[0],
         wpTags: initialData?.wpTags || [],
         thumbnailUrl: initialData?.thumbnailUrl || '',
-        bannerUrl: initialData?.bannerUrl || '',
         headerUrl: initialData?.headerUrl || ''
     })
 
@@ -61,14 +61,22 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
             const docId = initialData?.id || `${formData.lang}-${formData.slug}`
             const docRef = doc(db, 'content', docId)
 
-            const finalSlugPath = (() => {
-                if (formData.cmsCategory === 'news' || formData.cmsCategory === 'impact stories') return `story/${formData.slug}`
-                return `insight/${formData.slug}`
-            })();
+            // Derive category, subCategory, and slugPath from cmsCategory
+            const isStory = formData.cmsCategory === 'news' || formData.cmsCategory === 'impact stories' || formData.cmsCategory === 'press releases'
+            const finalCategory = isStory ? 'story' : 'insights'
+            const finalSubCategory = formData.cmsCategory === 'news' ? 'news'
+                : formData.cmsCategory === 'impact stories' ? 'impact'
+                : formData.cmsCategory === 'press releases' ? 'press-releases'
+                : formData.cmsCategory === 'voices' ? 'voices'
+                : formData.cmsCategory === 'publications' ? 'publications'
+                : 'insights'
+            const finalSlugPath = isStory ? `story/${formData.slug}` : `insights/${formData.slug}`
 
             const dataToSave = {
                 ...formData,
                 cmsCategory: formData.cmsCategory,
+                category: finalCategory,
+                subCategory: finalSubCategory,
                 slugPath: finalSlugPath,
                 updatedAt: new Date().toISOString()
             }
@@ -146,7 +154,7 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
         }
     }
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'thumbnailUrl' | 'bannerUrl' | 'headerUrl') => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'thumbnailUrl' | 'headerUrl') => {
         const file = e.target.files?.[0]
         if (!file) return
 
@@ -253,10 +261,9 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
                         </div>
 
                         {/* Image Uploads */}
-                        <div className="grid grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+                        <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-100">
                             {[
                                 { label: 'Thumbnail', field: 'thumbnailUrl' as const },
-                                { label: 'Banner Picture', field: 'bannerUrl' as const },
                                 { label: 'Header Picture', field: 'headerUrl' as const }
                             ].map(img => (
                                 <div key={img.field} className="flex flex-col gap-2">

@@ -64,7 +64,7 @@ export function getStaticPageComponent(slugPath: string, lang: string): React.Re
 
         // Insights section
         case 'insights':
-        case 'insights/articles':
+        case 'insights/insights':
         case 'insights/voices':
         case 'insights/publications':
         case 'insights/conferences':
