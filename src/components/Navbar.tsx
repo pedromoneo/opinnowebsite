@@ -62,14 +62,14 @@ export default function Navbar() {
             <div className="section-container flex items-center justify-between h-[72px]">
 
                 {/* Left side: Mobile Toggle + Logo */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                     {/* Mobile Toggle - left of logo */}
                     <button
-                        className="lg:hidden text-opinno-primary p-2"
+                        className="lg:hidden text-opinno-primary p-1 -ml-1"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         aria-label="Toggle menu"
                     >
-                        {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
 
                     {/* Logo */}
@@ -94,10 +94,28 @@ export default function Navbar() {
                     })}
                 </nav>
 
-                {/* Right Side - Language + CTAs */}
-                <div className="hidden lg:flex items-center gap-4">
-                    {/* Language Switcher */}
-                    <div className="flex items-center gap-1 text-sm text-opinno-primary uppercase">
+                {/* Right Side - Mobile CTA buttons + Desktop full controls */}
+                <div className="flex items-center gap-2 lg:gap-4">
+                    {/* Mobile CTA Buttons - compact */}
+                    <div className="flex lg:hidden items-center gap-2">
+                        <Link
+                            href={`/${activeLang.toLowerCase()}/clients`}
+                            className="px-3 py-1.5 border-2 border-opinno-accent text-opinno-accent text-xs font-bold tracking-wider uppercase hover:bg-opinno-accent hover:text-white transition-all duration-300"
+                        >
+                            {activeLang === 'ES' ? 'CLIENTES' : activeLang === 'IT' ? 'CLIENTI' : 'CLIENTS'}
+                        </Link>
+                        <a
+                            href={`https://opinno.jobs.personio.com/?language=${activeLang.toLowerCase()}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 bg-opinno-accent text-white text-xs font-bold tracking-wider uppercase hover:bg-opinno-accent-hover transition-all duration-300"
+                        >
+                            {activeLang === 'ES' ? 'TALENTO' : activeLang === 'IT' ? 'TALENTI' : 'TALENT'}
+                        </a>
+                    </div>
+
+                    {/* Desktop: Language Switcher */}
+                    <div className="hidden lg:flex items-center gap-1 text-sm text-opinno-primary uppercase">
                         {languages.map((lang, i) => (
                             <span key={lang.code} className="flex items-center">
                                 <Link
@@ -111,8 +129,8 @@ export default function Navbar() {
                         ))}
                     </div>
 
-                    {/* CTA Buttons */}
-                    <div className="flex items-center gap-3">
+                    {/* Desktop: CTA Buttons */}
+                    <div className="hidden lg:flex items-center gap-3">
                         <Link
                             href={`/${activeLang.toLowerCase()}/clients`}
                             className="px-6 py-2 border-2 border-opinno-accent text-opinno-accent text-sm font-bold tracking-wider uppercase hover:bg-opinno-accent hover:text-white transition-all duration-300"
