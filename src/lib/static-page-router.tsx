@@ -17,6 +17,7 @@ import ClientsPage from '@/components/pages/expertise/ClientsPage'
 
 // Stories pages
 import StoriesPage from '@/components/pages/stories/StoriesPage'
+import PressPage from '@/components/pages/stories/PressPage'
 
 // Insights pages
 import InsightsPage from '@/components/pages/insights/InsightsPage'
@@ -59,8 +60,9 @@ export function getStaticPageComponent(slugPath: string, lang: string): React.Re
         case 'stories/impact':
         case 'stories/news':
         case 'stories/press-releases':
-        case 'stories/press':
             return <StoriesPage {...props} category={slugPath === 'stories' ? 'all' : slugPath.split('/')[1]} />
+        case 'stories/press':
+            return <PressPage {...props} />
 
         // Insights section
         case 'insights':
