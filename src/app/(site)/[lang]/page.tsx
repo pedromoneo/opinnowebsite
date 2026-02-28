@@ -10,25 +10,21 @@ const SERVICES = [
         title: 'Open Innovation',
         description: 'Building new or joining existing ecosystems. Getting value from internal (Intrapreneurship) and external ecosystems (Open Innovation).',
         href: '/open-innovation',
-        icon: '🔍',
     },
     {
         title: 'Corporate Transformation',
         description: 'Designing and deploying new ways of working and new processes to build a more agile organization.',
         href: '/corporate-transformation',
-        icon: '⚡',
     },
     {
         title: 'Venture Building',
         description: 'Creating a go-to-market strategy and its implementation. From MVP to New Venture.',
         href: '/venture-building',
-        icon: '🚀',
     },
     {
         title: 'Technology Solutions',
         description: 'Conceptualization and architectural design, front and back end development, cloud migration, and deployment of teams with a DevOps culture.',
         href: '/technology-solutions',
-        icon: '💻',
     },
 ]
 
@@ -149,9 +145,18 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                         <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] mb-6 tracking-tight">
                             {t.heroTitle}
                         </h1>
-                        <p className="text-opinno-gray text-lg md:text-xl leading-relaxed mb-10 max-w-lg font-body">
+                        <p className="text-opinno-gray text-lg md:text-xl leading-relaxed mb-4 max-w-lg font-body">
                             {t.heroSubtitle}
                         </p>
+                        <div className="mb-10">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src="https://www.marques-de-france.fr/wp-content/uploads/2023/11/b-corp-logo.jpg"
+                                alt="B Corp Certified"
+                                className="h-[1.75em] w-auto grayscale"
+                                style={{ height: '1.75em', fontSize: 'inherit' }}
+                            />
+                        </div>
                         <div className="flex flex-wrap gap-4">
                             <Link href="/clients" className="btn-primary">
                                 {t.hireUs}
@@ -178,14 +183,6 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                                 allowFullScreen
                             />
                         </div>
-                        {/* B Corp Badge */}
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 lg:-left-12 lg:translate-x-0 lg:bottom-auto lg:top-[60%] w-[130px] h-[160px] bg-opinno-accent rounded-2xl flex flex-col items-center justify-center text-white shadow-xl z-10">
-                            <span className="text-xs font-medium mb-1">Certified</span>
-                            <div className="w-16 h-16 border-2 border-white rounded-full flex items-center justify-center mb-1">
-                                <span className="text-3xl font-bold">B</span>
-                            </div>
-                            <span className="text-xs font-medium">Corporation</span>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -210,7 +207,6 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                                 href={service.href}
                                 className="group bg-white p-8 rounded-lg card-hover border border-transparent hover:border-opinno-accent"
                             >
-                                <div className="text-3xl mb-4">{service.icon}</div>
                                 <h3 className="text-lg font-bold mb-3 group-hover:text-opinno-accent transition-colors">
                                     {service.title}
                                 </h3>

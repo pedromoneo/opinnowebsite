@@ -7,22 +7,22 @@ import { Menu, X } from 'lucide-react'
 const NAV_LINKS_LANG = {
     en: [
         { label: 'About', href: '/about' },
-        { label: 'Insights', href: '/insights' },
         { label: 'Expertise', href: '/expertise' },
+        { label: 'Insights', href: '/insights' },
         { label: 'Stories', href: '/stories' },
         { label: 'Contact', href: '/contact' },
     ],
     es: [
         { label: 'Nosotros', href: '/about' },
-        { label: 'Insights', href: '/insights' },
         { label: 'Servicios', href: '/expertise' },
+        { label: 'Insights', href: '/insights' },
         { label: 'Stories', href: '/stories' },
         { label: 'Contacto', href: '/contact' },
     ],
     it: [
         { label: 'Chi siamo', href: '/about' },
-        { label: 'Insights', href: '/insights' },
         { label: 'Servizi', href: '/expertise' },
+        { label: 'Insights', href: '/insights' },
         { label: 'Storie', href: '/stories' },
         { label: 'Contatti', href: '/contact' },
     ]

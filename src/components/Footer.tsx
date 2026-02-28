@@ -41,9 +41,8 @@ export default function Footer() {
 
     const FOOTER_SECTIONS = [
         { title: activeLang === 'es' ? 'NOSOTROS' : activeLang === 'it' ? 'CHI SIAMO' : 'ABOUT', links: getSidebar('about', activeLang) },
+        { title: activeLang === 'es' ? 'SERVICIOS' : activeLang === 'it' ? 'SERVIZI' : 'EXPERTISE', links: getSidebar('expertise', activeLang) },
         { title: 'INSIGHTS', links: getSidebar('insights', activeLang) },
-        { title: activeLang === 'es' ? 'SERVICIOS' : activeLang === 'it' ? 'SERVIZI' : 'SERVICES', links: getSidebar('expertise', activeLang) },
-        { title: activeLang === 'es' ? 'COMUNIDAD' : activeLang === 'it' ? 'COMMUNITY' : 'COMMUNITY', links: getSidebar('community', activeLang) },
         { title: 'STORIES', links: getSidebar('stories', activeLang) },
         { title: activeLang === 'es' ? 'CONTACTO' : activeLang === 'it' ? 'CONTATTI' : 'CONTACT', links: getSidebar('contact', activeLang) },
     ]
@@ -52,7 +51,7 @@ export default function Footer() {
         <footer className="bg-white border-t border-opinno-border">
             {/* Main Footer Content */}
             <div className="section-container py-16">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
                     {FOOTER_SECTIONS.map(section => (
                         <div key={section.title} className="flex flex-col gap-3">
                             <h4 className="font-bold text-opinno-primary text-sm tracking-wider mb-2">
