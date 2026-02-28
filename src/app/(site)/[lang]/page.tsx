@@ -148,7 +148,7 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                         <p className="text-opinno-gray text-lg md:text-xl leading-relaxed mb-4 max-w-lg font-body">
                             {t.heroSubtitle}
                         </p>
-                        <div className="mb-10">
+                        <div className="mb-10 flex items-center gap-3">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src="https://www.marques-de-france.fr/wp-content/uploads/2023/11/b-corp-logo.jpg"
@@ -156,6 +156,7 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                                 className="h-[1.75em] w-auto grayscale"
                                 style={{ height: '1.75em', fontSize: 'inherit' }}
                             />
+                            <span className="text-opinno-gray text-sm font-body">Opinno is a certified B Corporation</span>
                         </div>
                         <div className="flex flex-wrap gap-4">
                             <Link href="/clients" className="btn-primary">

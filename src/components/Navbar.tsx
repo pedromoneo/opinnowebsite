@@ -61,10 +61,22 @@ export default function Navbar() {
         <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-sm' : 'bg-white'}`}>
             <div className="section-container flex items-center justify-between h-[72px]">
 
-                {/* Logo */}
-                <Link href={`/${activeLang.toLowerCase()}`} className="flex items-center gap-2 shrink-0">
-                    <img src="/assets/opinno-logo.svg" alt="Opinno" className="h-[45px] w-auto" />
-                </Link>
+                {/* Left side: Mobile Toggle + Logo */}
+                <div className="flex items-center gap-2 shrink-0">
+                    {/* Mobile Toggle - left of logo */}
+                    <button
+                        className="lg:hidden text-opinno-primary p-2"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label="Toggle menu"
+                    >
+                        {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                    </button>
+
+                    {/* Logo */}
+                    <Link href={`/${activeLang.toLowerCase()}`} className="flex items-center gap-2">
+                        <img src="/assets/opinno-logo.svg" alt="Opinno" className="h-[45px] w-auto" />
+                    </Link>
+                </div>
 
                 {/* Desktop Nav - Center */}
                 <nav className="hidden lg:flex items-center gap-8">
@@ -117,15 +129,6 @@ export default function Navbar() {
                         </a>
                     </div>
                 </div>
-
-                {/* Mobile Toggle */}
-                <button
-                    className="lg:hidden text-opinno-primary p-2"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label="Toggle menu"
-                >
-                    {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-                </button>
             </div>
 
             {/* Mobile Menu */}
