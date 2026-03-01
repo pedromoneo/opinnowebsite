@@ -94,27 +94,9 @@ export default function Navbar() {
                     })}
                 </nav>
 
-                {/* Right Side - Mobile CTA buttons + Desktop full controls */}
-                <div className="flex items-center gap-2 lg:gap-4">
-                    {/* Mobile CTA Buttons - compact */}
-                    <div className="flex lg:hidden items-center gap-2">
-                        <Link
-                            href={`/${activeLang.toLowerCase()}/clients`}
-                            className="px-3 py-1.5 border-2 border-opinno-accent text-opinno-accent text-xs font-bold tracking-wider uppercase hover:bg-opinno-accent hover:text-white transition-all duration-300"
-                        >
-                            {activeLang === 'ES' ? 'CLIENTES' : activeLang === 'IT' ? 'CLIENTI' : 'CLIENTS'}
-                        </Link>
-                        <a
-                            href={`https://opinno.jobs.personio.com/?language=${activeLang.toLowerCase()}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1.5 bg-opinno-accent text-white text-xs font-bold tracking-wider uppercase hover:bg-opinno-accent-hover transition-all duration-300"
-                        >
-                            {activeLang === 'ES' ? 'TALENTO' : activeLang === 'IT' ? 'TALENTI' : 'TALENT'}
-                        </a>
-                    </div>
-
-                    {/* Desktop: Language Switcher */}
+                {/* Right Side - Desktop controls */}
+                <div className="hidden lg:flex items-center gap-4">
+                    {/* Language Switcher */}
                     <div className="hidden lg:flex items-center gap-1 text-sm text-opinno-primary uppercase">
                         {languages.map((lang, i) => (
                             <span key={lang.code} className="flex items-center">
@@ -129,8 +111,8 @@ export default function Navbar() {
                         ))}
                     </div>
 
-                    {/* Desktop: CTA Buttons */}
-                    <div className="hidden lg:flex items-center gap-3">
+                    {/* CTA Buttons */}
+                    <div className="flex items-center gap-3">
                         <Link
                             href={`/${activeLang.toLowerCase()}/clients`}
                             className="px-6 py-2 border-2 border-opinno-accent text-opinno-accent text-sm font-bold tracking-wider uppercase hover:bg-opinno-accent hover:text-white transition-all duration-300"
