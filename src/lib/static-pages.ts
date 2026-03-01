@@ -25,7 +25,6 @@ export const STATIC_PAGE_SLUGS = new Set([
     'cookies',
     'privacy',
     'quality-environment',
-    'equality-plan',
     'legal-notice',
     'compliance',
     'work',

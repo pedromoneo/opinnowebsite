@@ -1,37 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
-  <rect width="800" height="400" fill="#F8F9FA"/>
+  <rect width="800" height="400" fill="#F7F9FA"/>
   <!-- Three horizon lines -->
   <g opacity="0.08">
-    <line x1="50" y1="340" x2="750" y2="340" stroke="#1B2B4B" stroke-width="1"/>
-    <line x1="50" y1="280" x2="750" y2="280" stroke="#1B2B4B" stroke-width="1"/>
-    <line x1="50" y1="220" x2="750" y2="220" stroke="#1B2B4B" stroke-width="1"/>
+    <line x1="50" y1="340" x2="750" y2="340" stroke="#232323" stroke-width="1"/>
+    <line x1="50" y1="280" x2="750" y2="280" stroke="#232323" stroke-width="1"/>
+    <line x1="50" y1="220" x2="750" y2="220" stroke="#232323" stroke-width="1"/>
   </g>
   <!-- H1 Block -->
-  <rect x="100" y="120" width="160" height="200" rx="12" fill="#1B2B4B" opacity="0.06"/>
-  <rect x="100" y="120" width="160" height="200" rx="12" stroke="#1B2B4B" stroke-width="2" fill="none" opacity="0.12"/>
-  <circle cx="180" cy="185" r="28" fill="#FF6B35" opacity="0.2"/>
-  <text x="180" y="192" font-family="system-ui, sans-serif" font-size="20" fill="#1B2B4B" text-anchor="middle" font-weight="700" opacity="0.5">H1</text>
-  <text x="180" y="260" font-family="system-ui, sans-serif" font-size="11" fill="#1B2B4B" text-anchor="middle" font-weight="600" opacity="0.4">INTELLIGENCE</text>
-  <text x="180" y="280" font-family="system-ui, sans-serif" font-size="10" fill="#1B2B4B" text-anchor="middle" opacity="0.3">Understand today</text>
+  <rect x="100" y="120" width="160" height="200" rx="12" fill="#232323" opacity="0.06"/>
+  <rect x="100" y="120" width="160" height="200" rx="12" stroke="#232323" stroke-width="2" fill="none" opacity="0.12"/>
+  <circle cx="180" cy="185" r="28" fill="#76A662" opacity="0.2"/>
+  <text x="180" y="192" font-family="system-ui, sans-serif" font-size="20" fill="#232323" text-anchor="middle" font-weight="700" opacity="0.5">H1</text>
+  <text x="180" y="260" font-family="system-ui, sans-serif" font-size="11" fill="#232323" text-anchor="middle" font-weight="600" opacity="0.4">INTELLIGENCE</text>
+  <text x="180" y="280" font-family="system-ui, sans-serif" font-size="10" fill="#232323" text-anchor="middle" opacity="0.3">Understand today</text>
   <!-- H2 Block -->
-  <rect x="320" y="100" width="160" height="220" rx="12" fill="#FF6B35" opacity="0.06"/>
-  <rect x="320" y="100" width="160" height="220" rx="12" stroke="#FF6B35" stroke-width="2" fill="none" opacity="0.2"/>
-  <circle cx="400" cy="170" r="28" fill="#FF6B35" opacity="0.3"/>
-  <text x="400" y="177" font-family="system-ui, sans-serif" font-size="20" fill="#1B2B4B" text-anchor="middle" font-weight="700" opacity="0.5">H2</text>
-  <text x="400" y="245" font-family="system-ui, sans-serif" font-size="11" fill="#1B2B4B" text-anchor="middle" font-weight="600" opacity="0.4">TRANSFORMATION</text>
-  <text x="400" y="265" font-family="system-ui, sans-serif" font-size="10" fill="#1B2B4B" text-anchor="middle" opacity="0.3">Navigate tomorrow</text>
+  <rect x="320" y="100" width="160" height="220" rx="12" fill="#76A662" opacity="0.06"/>
+  <rect x="320" y="100" width="160" height="220" rx="12" stroke="#76A662" stroke-width="2" fill="none" opacity="0.2"/>
+  <circle cx="400" cy="170" r="28" fill="#76A662" opacity="0.3"/>
+  <text x="400" y="177" font-family="system-ui, sans-serif" font-size="20" fill="#232323" text-anchor="middle" font-weight="700" opacity="0.5">H2</text>
+  <text x="400" y="245" font-family="system-ui, sans-serif" font-size="11" fill="#232323" text-anchor="middle" font-weight="600" opacity="0.4">TRANSFORMATION</text>
+  <text x="400" y="265" font-family="system-ui, sans-serif" font-size="10" fill="#232323" text-anchor="middle" opacity="0.3">Navigate tomorrow</text>
   <!-- H3 Block -->
-  <rect x="540" y="80" width="160" height="240" rx="12" fill="#FF6B35" opacity="0.08"/>
-  <rect x="540" y="80" width="160" height="240" rx="12" stroke="#FF6B35" stroke-width="2" fill="none" opacity="0.3"/>
-  <circle cx="620" cy="155" r="28" fill="#FF6B35" opacity="0.4"/>
+  <rect x="540" y="80" width="160" height="240" rx="12" fill="#76A662" opacity="0.08"/>
+  <rect x="540" y="80" width="160" height="240" rx="12" stroke="#76A662" stroke-width="2" fill="none" opacity="0.3"/>
+  <circle cx="620" cy="155" r="28" fill="#76A662" opacity="0.4"/>
   <text x="620" y="162" font-family="system-ui, sans-serif" font-size="20" fill="white" text-anchor="middle" font-weight="700" opacity="0.8">H3</text>
-  <text x="620" y="235" font-family="system-ui, sans-serif" font-size="11" fill="#1B2B4B" text-anchor="middle" font-weight="600" opacity="0.4">INNOVATION</text>
-  <text x="620" y="255" font-family="system-ui, sans-serif" font-size="10" fill="#1B2B4B" text-anchor="middle" opacity="0.3">Create the future</text>
+  <text x="620" y="235" font-family="system-ui, sans-serif" font-size="11" fill="#232323" text-anchor="middle" font-weight="600" opacity="0.4">INNOVATION</text>
+  <text x="620" y="255" font-family="system-ui, sans-serif" font-size="10" fill="#232323" text-anchor="middle" opacity="0.3">Create the future</text>
   <!-- Connecting arrows -->
-  <path d="M265 210 L315 195" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
-  <polygon points="315,189 322,195 315,201" fill="#FF6B35" opacity="0.3"/>
-  <path d="M485 195 L535 175" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
-  <polygon points="535,169 542,175 535,181" fill="#FF6B35" opacity="0.3"/>
+  <path d="M265 210 L315 195" stroke="#76A662" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+  <polygon points="315,189 322,195 315,201" fill="#76A662" opacity="0.3"/>
+  <path d="M485 195 L535 175" stroke="#76A662" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+  <polygon points="535,169 542,175 535,181" fill="#76A662" opacity="0.3"/>
   <!-- Timeline label -->
-  <text x="400" y="375" font-family="system-ui, sans-serif" font-size="12" fill="#1B2B4B" text-anchor="middle" font-weight="500" letter-spacing="5" opacity="0.2">PRESENT ——————— FUTURE</text>
+  <text x="400" y="375" font-family="system-ui, sans-serif" font-size="12" fill="#232323" text-anchor="middle" font-weight="500" letter-spacing="5" opacity="0.2">PRESENT ——————— FUTURE</text>
 </svg>

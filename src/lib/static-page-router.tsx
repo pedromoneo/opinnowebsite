@@ -27,6 +27,7 @@ import CookiesPage from '@/components/pages/contact/CookiesPage'
 import PrivacyPage from '@/components/pages/contact/PrivacyPage'
 import LegalNoticePage from '@/components/pages/contact/LegalNoticePage'
 import CompliancePage from '@/components/pages/contact/CompliancePage'
+import QualityEnvironmentPage from '@/components/pages/contact/QualityEnvironmentPage'
 
 // Community pages
 import CommunityPage from '@/components/pages/community/CommunityPage'
@@ -76,8 +77,7 @@ export function getStaticPageComponent(slugPath: string, lang: string): React.Re
         case 'privacy': return <PrivacyPage {...props} />
         case 'legal-notice': return <LegalNoticePage {...props} />
         case 'compliance': return <CompliancePage {...props} />
-        case 'quality-environment': return <CompliancePage {...props} />
-        case 'equality-plan': return <CompliancePage {...props} />
+        case 'quality-environment': return <QualityEnvironmentPage {...props} />
 
         // Community section
         case 'work':

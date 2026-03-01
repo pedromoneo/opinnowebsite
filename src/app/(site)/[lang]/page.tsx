@@ -4,37 +4,78 @@ import HomeContactForm from '@/components/HomeContactForm'
 
 export const dynamic = 'force-dynamic';
 
-// Services data matching opinno.com
-const SERVICES = [
-    {
-        title: 'Open Innovation',
-        description: 'Building new or joining existing ecosystems. Getting value from internal (Intrapreneurship) and external ecosystems (Open Innovation).',
-        href: '/open-innovation',
-    },
-    {
-        title: 'Corporate Transformation',
-        description: 'Designing and deploying new ways of working and new processes to build a more agile organization.',
-        href: '/corporate-transformation',
-    },
-    {
-        title: 'Venture Building',
-        description: 'Creating a go-to-market strategy and its implementation. From MVP to New Venture.',
-        href: '/venture-building',
-    },
-    {
-        title: 'Technology Solutions',
-        description: 'Conceptualization and architectural design, front and back end development, cloud migration, and deployment of teams with a DevOps culture.',
-        href: '/technology-solutions',
-    },
-]
-
-const CENTERS_OF_EXCELLENCE = [
-    'Healthcare',
-    'Sustainability',
-    'Energy & Infrastructures',
-    'Public Sector',
-    'Retail & Consumer goods',
-]
+// Three Horizons expertise model
+const HORIZONS: Record<string, { tag: string; title: string; description: string; href: string; image: string }[]> = {
+    en: [
+        {
+            tag: 'H1',
+            title: 'Intelligence',
+            description: 'Research, analysis and strategic intelligence to understand today\'s landscape and make data-driven decisions.',
+            href: '/intelligence',
+            image: '/assets/expertise/h1-intelligence.svg',
+        },
+        {
+            tag: 'H2',
+            title: 'Transformation',
+            description: 'Organizational design, digital transformation and change management to navigate the journey toward tomorrow.',
+            href: '/transformation',
+            image: '/assets/expertise/h2-transformation.svg',
+        },
+        {
+            tag: 'H3',
+            title: 'Innovation',
+            description: 'Open innovation ecosystems and venture building to create the future and drive breakthrough growth.',
+            href: '/innovation',
+            image: '/assets/expertise/h3-innovation.svg',
+        },
+    ],
+    es: [
+        {
+            tag: 'H1',
+            title: 'Inteligencia',
+            description: 'Investigación, análisis e inteligencia estratégica para entender el panorama actual y tomar decisiones basadas en datos.',
+            href: '/intelligence',
+            image: '/assets/expertise/h1-intelligence.svg',
+        },
+        {
+            tag: 'H2',
+            title: 'Transformación',
+            description: 'Diseño organizacional, transformación digital y gestión del cambio para navegar el camino hacia el mañana.',
+            href: '/transformation',
+            image: '/assets/expertise/h2-transformation.svg',
+        },
+        {
+            tag: 'H3',
+            title: 'Innovación',
+            description: 'Ecosistemas de innovación abierta y creación de nuevos negocios para crear el futuro e impulsar el crecimiento.',
+            href: '/innovation',
+            image: '/assets/expertise/h3-innovation.svg',
+        },
+    ],
+    it: [
+        {
+            tag: 'H1',
+            title: 'Intelligence',
+            description: 'Ricerca, analisi e intelligence strategica per comprendere il panorama attuale e prendere decisioni basate sui dati.',
+            href: '/intelligence',
+            image: '/assets/expertise/h1-intelligence.svg',
+        },
+        {
+            tag: 'H2',
+            title: 'Trasformazione',
+            description: 'Design organizzativo, trasformazione digitale e gestione del cambiamento per navigare il percorso verso il domani.',
+            href: '/transformation',
+            image: '/assets/expertise/h2-transformation.svg',
+        },
+        {
+            tag: 'H3',
+            title: 'Innovazione',
+            description: 'Ecosistemi di innovazione aperta e venture building per creare il futuro e guidare la crescita.',
+            href: '/innovation',
+            image: '/assets/expertise/h3-innovation.svg',
+        },
+    ],
+}
 
 const TRANSLATIONS: Record<string, any> = {
     en: {
@@ -42,9 +83,8 @@ const TRANSLATIONS: Record<string, any> = {
         heroSubtitle: 'Opinno is a global innovation consultancy. We transform organizations using methodologies invented by entrepreneurs.',
         hireUs: 'HIRE US',
         joinUs: 'JOIN US',
-        mainServices: 'MAIN SERVICES',
+        ourExpertise: 'OUR EXPERTISE',
         viewAll: 'View all',
-        centersOfExcellence: 'Centers of excellence',
         impactStories: 'IMPACT STORIES',
         howWeWork: 'HOW WE WORK',
         howWeWorkText: 'Open your company up to the digital age. We can connect your business to our network of more than 50,000 innovation, transformation and technology experts, overseen by Opinno-trained and certified project managers.',
@@ -57,9 +97,8 @@ const TRANSLATIONS: Record<string, any> = {
         heroSubtitle: 'Opinno es una consultora global de innovación. Transformamos organizaciones utilizando metodologías inventadas por emprendedores.',
         hireUs: 'CONTÁCTANOS',
         joinUs: 'ÚNETE A NOSOTROS',
-        mainServices: 'SERVICIOS PRINCIPALES',
+        ourExpertise: 'NUESTRA EXPERIENCIA',
         viewAll: 'Ver todos',
-        centersOfExcellence: 'Centros de excelencia',
         impactStories: 'HISTORIAS DE IMPACTO',
         howWeWork: 'CÓMO TRABAJAMOS',
         howWeWorkText: 'Abre tu empresa a la era digital. Podemos conectar tu negocio a nuestra red de más de 50.000 expertos en innovación, transformación y tecnología, bajo la supervisión de gestores de proyectos formados y certificados por Opinno.',
@@ -72,9 +111,8 @@ const TRANSLATIONS: Record<string, any> = {
         heroSubtitle: "Opinno è una società di consulenza globale per l'innovazione. Trasformiamo le organizzazioni utilizzando metodologie inventate dagli imprenditori.",
         hireUs: 'CONTATTACI',
         joinUs: 'UNISCITI A NOI',
-        mainServices: 'SERVIZI PRINCIPALI',
+        ourExpertise: 'LA NOSTRA COMPETENZA',
         viewAll: 'Vedi tutti',
-        centersOfExcellence: 'Centri di eccellenza',
         impactStories: 'STORIE DI IMPATTO',
         howWeWork: 'COME LAVORIAMO',
         howWeWorkText: 'Apri la tua azienda all\'era digitale. Possiamo collegare la tua attività alla nostra rete di oltre 50.000 esperti di innovazione, trasformazione e tecnologia, supervisionati da project manager formati e certificati da Opinno.',
@@ -188,11 +226,11 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                 </div>
             </section>
 
-            {/* ===== MAIN SERVICES SECTION ===== */}
+            {/* ===== OUR EXPERTISE — THREE HORIZONS ===== */}
             <section className="bg-opinno-light-bg py-20">
                 <div className="section-container">
                     <div className="flex justify-between items-center mb-12">
-                        <h2 className="section-title">{t.mainServices}</h2>
+                        <h2 className="section-title">{t.ourExpertise}</h2>
                         <Link
                             href={`/${lang}/expertise`}
                             className="text-opinno-accent font-bold text-sm hover:underline underline-offset-4 tracking-wide"
@@ -201,35 +239,33 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {SERVICES.map(service => (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {(HORIZONS[lang] || HORIZONS.en).map(horizon => (
                             <Link
-                                key={service.title}
-                                href={service.href}
-                                className="group bg-white p-8 rounded-lg card-hover border border-transparent hover:border-opinno-accent"
+                                key={horizon.tag}
+                                href={horizon.href}
+                                className="group bg-white rounded-xl overflow-hidden card-hover border border-transparent hover:border-opinno-accent"
                             >
-                                <h3 className="text-lg font-bold mb-3 group-hover:text-opinno-accent transition-colors">
-                                    {service.title}
-                                </h3>
-                                <p className="text-opinno-gray text-sm leading-relaxed font-body">
-                                    {service.description}
-                                </p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={horizon.image}
+                                    alt={`${horizon.tag} — ${horizon.title}`}
+                                    className="w-full h-48 object-cover bg-opinno-light-bg"
+                                    loading="lazy"
+                                />
+                                <div className="p-8">
+                                    <span className="inline-block text-xs font-bold tracking-widest text-opinno-accent mb-2">
+                                        {horizon.tag}
+                                    </span>
+                                    <h3 className="text-xl font-bold mb-3 group-hover:text-opinno-accent transition-colors">
+                                        {horizon.title}
+                                    </h3>
+                                    <p className="text-opinno-gray text-sm leading-relaxed font-body">
+                                        {horizon.description}
+                                    </p>
+                                </div>
                             </Link>
                         ))}
-                    </div>
-
-                    <div className="mt-12 pt-8 border-t border-opinno-border">
-                        <h4 className="text-sm font-bold mb-4 text-opinno-gray tracking-wider">{t.centersOfExcellence}</h4>
-                        <div className="flex flex-wrap gap-3">
-                            {CENTERS_OF_EXCELLENCE.map(center => (
-                                <span
-                                    key={center}
-                                    className="px-4 py-2 bg-white border border-opinno-border text-opinno-gray text-sm font-medium rounded"
-                                >
-                                    {center}
-                                </span>
-                            ))}
-                        </div>
                     </div>
                 </div>
             </section>

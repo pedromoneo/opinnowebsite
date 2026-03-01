@@ -1,38 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" fill="none">
-  <rect width="800" height="500" fill="#F8F9FA"/>
+  <rect width="800" height="500" fill="#F7F9FA"/>
   <!-- Subtle radiating lines -->
   <g opacity="0.05" transform="translate(400, 230)">
-    <line x1="0" y1="-200" x2="0" y2="200" stroke="#1B2B4B" stroke-width="1"/>
-    <line x1="-200" y1="0" x2="200" y2="0" stroke="#1B2B4B" stroke-width="1"/>
-    <line x1="-141" y1="-141" x2="141" y2="141" stroke="#1B2B4B" stroke-width="1"/>
-    <line x1="141" y1="-141" x2="-141" y2="141" stroke="#1B2B4B" stroke-width="1"/>
+    <line x1="0" y1="-200" x2="0" y2="200" stroke="#232323" stroke-width="1"/>
+    <line x1="-200" y1="0" x2="200" y2="0" stroke="#232323" stroke-width="1"/>
+    <line x1="-141" y1="-141" x2="141" y2="141" stroke="#232323" stroke-width="1"/>
+    <line x1="141" y1="-141" x2="-141" y2="141" stroke="#232323" stroke-width="1"/>
   </g>
   <!-- Lightbulb shape -->
   <g transform="translate(330, 100)">
-    <path d="M70 0 C30 0, 0 35, 0 75 C0 110, 25 135, 40 155 L40 180 L100 180 L100 155 C115 135, 140 110, 140 75 C140 35, 110 0, 70 0Z" stroke="#1B2B4B" stroke-width="4" fill="none" opacity="0.12"/>
-    <rect x="40" y="185" width="60" height="10" rx="3" fill="#1B2B4B" opacity="0.1"/>
-    <rect x="45" y="200" width="50" height="10" rx="3" fill="#1B2B4B" opacity="0.1"/>
-    <rect x="50" y="215" width="40" height="8" rx="4" fill="#1B2B4B" opacity="0.1"/>
+    <path d="M70 0 C30 0, 0 35, 0 75 C0 110, 25 135, 40 155 L40 180 L100 180 L100 155 C115 135, 140 110, 140 75 C140 35, 110 0, 70 0Z" stroke="#232323" stroke-width="4" fill="none" opacity="0.12"/>
+    <rect x="40" y="185" width="60" height="10" rx="3" fill="#232323" opacity="0.1"/>
+    <rect x="45" y="200" width="50" height="10" rx="3" fill="#232323" opacity="0.1"/>
+    <rect x="50" y="215" width="40" height="8" rx="4" fill="#232323" opacity="0.1"/>
   </g>
   <!-- Rocket -->
   <g transform="translate(340, 120)">
-    <path d="M70 180 L70 80 C70 40, 90 10, 100 0 C110 10, 130 40, 130 80 L130 180Z" fill="#FF6B35" opacity="0.15" stroke="#FF6B35" stroke-width="3" stroke-opacity="0.4"/>
+    <path d="M70 180 L70 80 C70 40, 90 10, 100 0 C110 10, 130 40, 130 80 L130 180Z" fill="#76A662" opacity="0.15" stroke="#76A662" stroke-width="3" stroke-opacity="0.4"/>
     <!-- Window -->
-    <circle cx="100" cy="90" r="18" fill="#FF6B35" opacity="0.3"/>
+    <circle cx="100" cy="90" r="18" fill="#76A662" opacity="0.3"/>
     <circle cx="100" cy="90" r="10" fill="white" opacity="0.5"/>
     <!-- Fins -->
-    <path d="M70 150 L40 190 L70 180Z" fill="#FF6B35" opacity="0.3"/>
-    <path d="M130 150 L160 190 L130 180Z" fill="#FF6B35" opacity="0.3"/>
+    <path d="M70 150 L40 190 L70 180Z" fill="#76A662" opacity="0.3"/>
+    <path d="M130 150 L160 190 L130 180Z" fill="#76A662" opacity="0.3"/>
     <!-- Flame -->
-    <path d="M80 185 Q100 230 120 185" fill="#FF6B35" opacity="0.5"/>
-    <path d="M88 185 Q100 215 112 185" fill="#FF6B35" opacity="0.7"/>
+    <path d="M80 185 Q100 230 120 185" fill="#76A662" opacity="0.5"/>
+    <path d="M88 185 Q100 215 112 185" fill="#76A662" opacity="0.7"/>
   </g>
   <!-- Sparkle dots -->
-  <circle cx="280" cy="140" r="4" fill="#FF6B35" opacity="0.4"/>
-  <circle cx="520" cy="180" r="3" fill="#FF6B35" opacity="0.3"/>
-  <circle cx="550" cy="120" r="5" fill="#FF6B35" opacity="0.35"/>
-  <circle cx="260" cy="280" r="3" fill="#FF6B35" opacity="0.25"/>
-  <circle cx="540" cy="300" r="4" fill="#FF6B35" opacity="0.3"/>
+  <circle cx="280" cy="140" r="4" fill="#76A662" opacity="0.4"/>
+  <circle cx="520" cy="180" r="3" fill="#76A662" opacity="0.3"/>
+  <circle cx="550" cy="120" r="5" fill="#76A662" opacity="0.35"/>
+  <circle cx="260" cy="280" r="3" fill="#76A662" opacity="0.25"/>
+  <circle cx="540" cy="300" r="4" fill="#76A662" opacity="0.3"/>
   <!-- Label -->
-  <text x="400" y="440" font-family="system-ui, sans-serif" font-size="16" fill="#1B2B4B" text-anchor="middle" font-weight="600" letter-spacing="3" opacity="0.3">H3 INNOVATION</text>
+  <text x="400" y="440" font-family="system-ui, sans-serif" font-size="16" fill="#232323" text-anchor="middle" font-weight="600" letter-spacing="3" opacity="0.3">H3 INNOVATION</text>
 </svg>
