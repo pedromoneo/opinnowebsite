@@ -9,10 +9,9 @@ import LeadershipPage from '@/components/pages/about/LeadershipPage'
 
 // Expertise pages
 import ExpertisePage from '@/components/pages/expertise/ExpertisePage'
-import FrameworkPage from '@/components/pages/expertise/FrameworkPage'
-import OpenInnovationPage from '@/components/pages/expertise/OpenInnovationPage'
-import CorporateTransformationPage from '@/components/pages/expertise/CorporateTransformationPage'
-import VentureBuildingPage from '@/components/pages/expertise/VentureBuildingPage'
+import IntelligencePage from '@/components/pages/expertise/IntelligencePage'
+import TransformationPage from '@/components/pages/expertise/TransformationPage'
+import InnovationPage from '@/components/pages/expertise/InnovationPage'
 import ClientsPage from '@/components/pages/expertise/ClientsPage'
 
 // Stories pages
@@ -49,10 +48,9 @@ export function getStaticPageComponent(slugPath: string, lang: string): React.Re
 
         // Expertise section
         case 'expertise': return <ExpertisePage {...props} />
-        case 'framework': return <FrameworkPage {...props} />
-        case 'open-innovation': return <OpenInnovationPage {...props} />
-        case 'corporate-transformation': return <CorporateTransformationPage {...props} />
-        case 'venture-building': return <VentureBuildingPage {...props} />
+        case 'intelligence': return <IntelligencePage {...props} />
+        case 'transformation': return <TransformationPage {...props} />
+        case 'innovation': return <InnovationPage {...props} />
         case 'clients': return <ClientsPage {...props} />
 
         // Stories section

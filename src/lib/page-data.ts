@@ -12,23 +12,11 @@ export function getSidebar(type: string, lang: string) {
                 { label: 'Careers', href: 'https://opinno.jobs.personio.com/?language=en' },
             ],
             expertise: [
-                { label: 'Hire us!', href: '/clients' },
-                { label: 'Framework', href: '/framework' },
-                {
-                    label: 'Services', href: '/expertise',
-                    children: [
-                        { label: 'Open Innovation', href: '/open-innovation' },
-                        { label: 'Corporate Transformation', href: '/corporate-transformation' },
-                        { label: 'Venture Building', href: '/venture-building' },
-                    ],
-                },
-                {
-                    label: 'Industries', href: '/industries',
-                    children: [
-                        { label: 'Healthcare', href: '/healthcare' },
-                        { label: 'Sustainability', href: '/sustainability' },
-                    ],
-                },
+                { label: 'Overview', href: '/expertise' },
+                { label: 'H1 — Intelligence', href: '/intelligence' },
+                { label: 'H2 — Transformation', href: '/transformation' },
+                { label: 'H3 — Innovation', href: '/innovation' },
+                { label: 'Client Login', href: '/clients' },
             ],
             stories: [
                 { label: 'All', href: '/stories' },
@@ -68,23 +56,11 @@ export function getSidebar(type: string, lang: string) {
                 { label: 'Carreras', href: 'https://opinno.jobs.personio.com/?language=es' },
             ],
             expertise: [
-                { label: '¡Contáctanos!', href: '/clients' },
-                { label: 'Metodología', href: '/framework' },
-                {
-                    label: 'Servicios', href: '/expertise',
-                    children: [
-                        { label: 'Innovación Abierta', href: '/open-innovation' },
-                        { label: 'Transformación Corporativa', href: '/corporate-transformation' },
-                        { label: 'Venture Building', href: '/venture-building' },
-                    ],
-                },
-                {
-                    label: 'Sectores', href: '/industries',
-                    children: [
-                        { label: 'Salud', href: '/healthcare' },
-                        { label: 'Sostenibilidad', href: '/sustainability' },
-                    ],
-                },
+                { label: 'Servicios', href: '/expertise' },
+                { label: 'H1 — Inteligencia', href: '/intelligence' },
+                { label: 'H2 — Transformación', href: '/transformation' },
+                { label: 'H3 — Innovación', href: '/innovation' },
+                { label: 'Acceso Clientes', href: '/clients' },
             ],
             stories: [
                 { label: 'Todos', href: '/stories' },
@@ -124,23 +100,11 @@ export function getSidebar(type: string, lang: string) {
                 { label: 'Lavora con noi', href: 'https://opinno.jobs.personio.com/?language=en' },
             ],
             expertise: [
-                { label: 'Contattaci!', href: '/clients' },
-                { label: 'Metodologia', href: '/framework' },
-                {
-                    label: 'Servizi', href: '/expertise',
-                    children: [
-                        { label: 'Open Innovation', href: '/open-innovation' },
-                        { label: 'Trasformazione Aziendale', href: '/corporate-transformation' },
-                        { label: 'Venture Building', href: '/venture-building' },
-                    ],
-                },
-                {
-                    label: 'Settori', href: '/industries',
-                    children: [
-                        { label: 'Sanità', href: '/healthcare' },
-                        { label: 'Sostenibilità', href: '/sustainability' },
-                    ],
-                },
+                { label: 'Servizi', href: '/expertise' },
+                { label: 'H1 — Intelligence', href: '/intelligence' },
+                { label: 'H2 — Trasformazione', href: '/transformation' },
+                { label: 'H3 — Innovazione', href: '/innovation' },
+                { label: 'Accesso Clienti', href: '/clients' },
             ],
             stories: [
                 { label: 'Tutti', href: '/stories' },
