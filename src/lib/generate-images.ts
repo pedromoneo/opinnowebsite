@@ -5,7 +5,7 @@
 import { GoogleGenAI } from '@google/genai';
 
 // Configurable via env — tries models in order of preference
-const IMAGE_MODELS = (process.env.IMAGE_MODEL || 'imagen-4.0-fast-generate-001,imagen-3.0-generate-002,imagen-3.0-generate-001').split(',');
+const IMAGE_MODELS = (process.env.IMAGE_MODEL || 'nanobanana,imagen-4.0-generate-001,imagen-4.0-fast-generate-001,imagen-3.0-generate-002').split(',');
 
 interface GeneratedImages {
     featuredImage: string;
@@ -80,12 +80,12 @@ export async function generatePostImages(
 }
 
 function buildPrompt(title: string, excerpt?: string, type?: string): string {
-    const context = excerpt ? ` The article discusses: ${excerpt.slice(0, 200)}` : '';
+    const context = excerpt ? ` The article is about: ${excerpt.slice(0, 200)}` : '';
     const style = type === 'story'
-        ? 'documentary photography style, authentic, human-centric'
-        : 'modern corporate editorial style, clean, professional';
+        ? 'warm documentary photography, authentic human moments, rich natural tones, candid'
+        : 'vibrant editorial photography, dynamic composition, warm earthy tones, rich textures';
 
-    return `Professional high-quality editorial photograph for a corporate innovation blog post titled "${title}".${context} Style: ${style}. The image should be visually compelling with subtle technology and innovation themes. IMPORTANT: Do not include any text, words, letters, numbers, captions, titles, labels, watermarks, or logos anywhere in the image. The image must be purely visual with no text of any kind. Photorealistic, well-lit, balanced composition.`;
+    return `A striking editorial photograph for an innovation consultancy article titled "${title}".${context} Visual style: ${style}. The image should feel energetic, human, and forward-looking. Use warm, rich colour palettes — terracotta, amber, sage green, ochre, warm white — avoid cold blues, grey tech backgrounds, and generic corporate stock aesthetics. Focus on people collaborating, natural textures, architectural details, or abstract patterns that evoke creativity and transformation. CRITICAL RULE: The image must contain absolutely zero text, letters, numbers, words, captions, titles, labels, watermarks, logos, signage, or written characters of any kind. Pure visual imagery only, no typography anywhere in the frame. Photorealistic, cinematic lighting, 16:9 composition.`;
 }
 
 async function uploadToStorage(imageBuffer: Buffer, path: string): Promise<string> {
