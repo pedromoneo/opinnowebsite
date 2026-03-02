@@ -50,8 +50,24 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
                 email = window.prompt('Please provide your email for confirmation')
             }
             if (email) {
-                signInWithEmailLink(auth, email, window.location.href)
-                    .then(() => {
+                const emailId = email.toLowerCase()
+                signInWithEmailLink(auth, emailId, window.location.href)
+                    .then(async (result) => {
+                        // Create client profile if this is the first sign-in
+                        const user = result.user
+                        if (user.email) {
+                            const clientRef = doc(db, 'clients', user.email.toLowerCase())
+                            const clientSnap = await getDoc(clientRef)
+                            if (!clientSnap.exists()) {
+                                await setDoc(clientRef, {
+                                    email: user.email.toLowerCase(),
+                                    name: user.displayName || '',
+                                    photoURL: user.photoURL || '',
+                                    createdAt: new Date().toISOString(),
+                                    lastLoginAt: new Date().toISOString(),
+                                })
+                            }
+                        }
                         window.localStorage.removeItem('clientEmailForSignIn')
                         window.history.replaceState({}, '', window.location.pathname)
                     })
@@ -63,7 +79,9 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
         }
     }, [])
 
-    // Listen to auth state changes
+    // Listen to auth state changes — only update existing client profiles, never auto-create.
+    // Profile creation happens in loginWithGoogle / completeMagicLinkLogin so that CMS admins
+    // who share the same Firebase Auth instance don't bypass the client gate.
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setClientUser(user)
@@ -76,24 +94,17 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
                     const clientSnap = await getDoc(clientRef)
 
                     if (clientSnap.exists()) {
-                        // Existing client — update last login
+                        // Existing client — update last login and expose data
                         const data = clientSnap.data() as ClientData
                         await setDoc(clientRef, { lastLoginAt: new Date().toISOString() }, { merge: true })
                         setClientData({ ...data, lastLoginAt: new Date().toISOString() })
                     } else {
-                        // New client — create profile
-                        const newClient: ClientData = {
-                            email: emailId,
-                            name: user.displayName || '',
-                            photoURL: user.photoURL || '',
-                            createdAt: new Date().toISOString(),
-                            lastLoginAt: new Date().toISOString(),
-                        }
-                        await setDoc(clientRef, newClient)
-                        setClientData(newClient)
+                        // Not a registered client (e.g. CMS admin) — leave clientData null
+                        setClientData(null)
                     }
                 } catch (e) {
-                    console.error('Error managing client profile:', e)
+                    console.error('Error fetching client profile:', e)
+                    setClientData(null)
                 }
             } else {
                 setClientData(null)
@@ -108,7 +119,24 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
         setError(null)
         try {
             const provider = new GoogleAuthProvider()
-            await signInWithPopup(auth, provider)
+            const result = await signInWithPopup(auth, provider)
+            const user = result.user
+            if (user.email) {
+                const emailId = user.email.toLowerCase()
+                const clientRef = doc(db, 'clients', emailId)
+                const clientSnap = await getDoc(clientRef)
+                if (!clientSnap.exists()) {
+                    const newClient: ClientData = {
+                        email: emailId,
+                        name: user.displayName || '',
+                        photoURL: user.photoURL || '',
+                        createdAt: new Date().toISOString(),
+                        lastLoginAt: new Date().toISOString(),
+                    }
+                    await setDoc(clientRef, newClient)
+                }
+            }
+            // onAuthStateChanged will fire next and set clientData from the profile
         } catch (err: any) {
             if (err.code !== 'auth/popup-closed-by-user') {
                 setError(err.message || 'Failed to sign in with Google.')

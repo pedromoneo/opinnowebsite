@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { useClientAuth } from '@/lib/client-auth-context'
 
 export default function ClientLoginGate({ children, lang }: { children: React.ReactNode; lang: string }) {
-    const { clientUser, loading, error, loginWithGoogle, loginWithMagicLink, clearError } = useClientAuth()
+    const { clientUser, clientData, loading, error, loginWithGoogle, loginWithMagicLink, clearError } = useClientAuth()
     const [email, setEmail] = useState('')
     const [linkSent, setLinkSent] = useState(false)
     const [sending, setSending] = useState(false)
 
-    // Logged in — show the gated content
-    if (!loading && clientUser) {
+    // Logged in as a client (has a client profile) — show the gated content
+    if (!loading && clientUser && clientData) {
         return <>{children}</>
     }
 

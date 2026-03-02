@@ -12,32 +12,6 @@ export default function ClientsPage({ lang }: { lang: string }) {
             sidebar={getSidebar("expertise", lang)}
         >
             <ClientLoginGate lang={lang}>
-            <div className="mb-12">
-                <p className="text-xl md:text-2xl leading-relaxed text-opinno-primary mb-8">
-                    {lang === 'es' ? 'Una plataforma global de expertos en innovación.' : lang === 'it' ? 'Una piattaforma globale di esperti in innovazione.' : 'A global platform of innovation experts.'}
-                </p>
-            </div>
-
-            <div className="mb-10">
-                <p className="text-base text-opinno-gray font-body leading-relaxed mb-4">
-                    {lang === 'es' ? 'Ofrecemos tres modelos flexibles de colaboración para ayudarte a innovar:' : lang === 'it' ? 'Offriamo tre modelli di collaborazione flessibili per aiutarti a innovare:' : 'We offer three flexible engagement models to help you innovate:'}
-                </p>
-                <ul className="space-y-3 ml-4 mb-6">
-                    <li className="text-base text-opinno-gray font-body leading-relaxed flex items-start gap-2">
-                        <span className="text-opinno-accent mt-1">●</span>
-                        <span><strong>{lang === 'es' ? 'Colaboraciones basadas en proyectos' : lang === 'it' ? 'Collaborazioni basate su progetti' : 'Project-based collaborations'}</strong> — {lang === 'es' ? 'Participación en retos específicos de innovación con alcance y tiempos definidos.' : lang === 'it' ? 'Impegno in sfide di innovazione specifiche con ambito e tempistiche definiti.' : 'Engagement on specific innovation challenges with defined scope and timeline.'}</span>
-                    </li>
-                    <li className="text-base text-opinno-gray font-body leading-relaxed flex items-start gap-2">
-                        <span className="text-opinno-accent mt-1">●</span>
-                        <span><strong>{lang === 'es' ? 'Consultoría como servicio' : lang === 'it' ? 'Consulenza come servizio' : 'Consulting as a service'}</strong> — {lang === 'es' ? 'Acceso continuo a nuestra experiencia en innovación a través de un modelo de suscripción.' : lang === 'it' ? 'Accesso continuo alla nostra esperienza nell\'innovazione attraverso un modello di abbonamento.' : 'Ongoing access to our innovation expertise through a subscription model.'}</span>
-                    </li>
-                    <li className="text-base text-opinno-gray font-body leading-relaxed flex items-start gap-2">
-                        <span className="text-opinno-accent mt-1">●</span>
-                        <span><strong>{lang === 'es' ? 'Plataforma comunitaria' : lang === 'it' ? 'Piattaforma comunitaria' : 'Community platform'}</strong> — {lang === 'es' ? 'Acceso a nuestra plataforma propietaria que te conecta con más de 50.000 expertos en innovación a nivel mundial.' : lang === 'it' ? 'Accesso alla nostra piattaforma proprietaria che ti connette con oltre 50.000 esperti in innovazione a livello globale.' : 'Access to our proprietary platform connecting you with 50,000+ innovation experts worldwide.'}</span>
-                    </li>
-                </ul>
-            </div>
-
             {/* Inquiry form */}
             <div className="mt-12 pt-8 border-t border-opinno-border">
                 <h2 className="text-2xl font-bold font-display mb-6">
