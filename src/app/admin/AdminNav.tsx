@@ -81,6 +81,33 @@ export function AdminNav({ collapsed = false }: { collapsed?: boolean }) {
                     ))}
                 </>
             )}
+
+            {/* Visit site */}
+            <div className="pt-3 mt-2 border-t border-gray-700/50">
+                <a
+                    href="/en"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center gap-3 rounded-lg transition-colors font-medium text-gray-300 hover:bg-white/10 hover:text-white
+                        ${collapsed ? 'px-0 py-2.5 justify-center' : 'px-4 py-2.5'}
+                    `}
+                    title={collapsed ? 'Visit site' : undefined}
+                >
+                    <span className="flex-shrink-0">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                    </span>
+                    {!collapsed && (
+                        <span className="flex items-center gap-1.5 text-sm truncate">
+                            Visit site
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                            </svg>
+                        </span>
+                    )}
+                </a>
+            </div>
         </nav>
     )
 }
