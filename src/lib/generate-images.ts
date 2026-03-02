@@ -5,7 +5,7 @@
 import { GoogleGenAI } from '@google/genai';
 
 // Configurable via env — tries models in order of preference
-const IMAGE_MODELS = (process.env.IMAGE_MODEL || 'nanobanana,imagen-4.0-generate-001,imagen-4.0-fast-generate-001,imagen-3.0-generate-002').split(',');
+const IMAGE_MODELS = (process.env.IMAGE_MODEL || 'imagen-3.0-generate-001,imagen-3.0-generate-002,imagen-4.0-fast-generate-001').split(',');
 
 interface GeneratedImages {
     featuredImage: string;
