@@ -2,7 +2,81 @@ import InteriorPageLayout from '@/components/InteriorPageLayout'
 import { getSidebar, PARTNER_LOGOS } from '@/lib/page-data'
 import Link from 'next/link'
 
+const HORIZONS: Record<string, { tag: string; title: string; description: string; href: string; image: string }[]> = {
+    en: [
+        {
+            tag: 'H1',
+            title: 'Intelligence',
+            description: 'Research, analysis and strategic intelligence to understand today\'s landscape and make data-driven decisions.',
+            href: '/intelligence',
+            image: '/assets/expertise/h1-intelligence.svg',
+        },
+        {
+            tag: 'H2',
+            title: 'Transformation',
+            description: 'Organizational design, digital transformation and change management to navigate the journey toward tomorrow.',
+            href: '/transformation',
+            image: '/assets/expertise/h2-transformation.svg',
+        },
+        {
+            tag: 'H3',
+            title: 'Innovation',
+            description: 'Open innovation ecosystems and venture building to create the future and drive breakthrough growth.',
+            href: '/innovation',
+            image: '/assets/expertise/h3-innovation.svg',
+        },
+    ],
+    es: [
+        {
+            tag: 'H1',
+            title: 'Inteligencia',
+            description: 'Investigación, análisis e inteligencia estratégica para entender el panorama actual y tomar decisiones basadas en datos.',
+            href: '/intelligence',
+            image: '/assets/expertise/h1-intelligence.svg',
+        },
+        {
+            tag: 'H2',
+            title: 'Transformación',
+            description: 'Diseño organizacional, transformación digital y gestión del cambio para navegar el camino hacia el mañana.',
+            href: '/transformation',
+            image: '/assets/expertise/h2-transformation.svg',
+        },
+        {
+            tag: 'H3',
+            title: 'Innovación',
+            description: 'Ecosistemas de innovación abierta y creación de nuevos negocios para crear el futuro e impulsar el crecimiento.',
+            href: '/innovation',
+            image: '/assets/expertise/h3-innovation.svg',
+        },
+    ],
+    it: [
+        {
+            tag: 'H1',
+            title: 'Intelligence',
+            description: 'Ricerca, analisi e intelligence strategica per comprendere il panorama attuale e prendere decisioni basate sui dati.',
+            href: '/intelligence',
+            image: '/assets/expertise/h1-intelligence.svg',
+        },
+        {
+            tag: 'H2',
+            title: 'Trasformazione',
+            description: 'Design organizzativo, trasformazione digitale e gestione del cambiamento per navigare il percorso verso il domani.',
+            href: '/transformation',
+            image: '/assets/expertise/h2-transformation.svg',
+        },
+        {
+            tag: 'H3',
+            title: 'Innovazione',
+            description: 'Ecosistemi di innovazione aperta e venture building per creare il futuro e guidare la crescita.',
+            href: '/innovation',
+            image: '/assets/expertise/h3-innovation.svg',
+        },
+    ],
+}
+
 export default function AboutOverviewPage({ lang }: { lang: string }) {
+    const horizons = HORIZONS[lang] || HORIZONS['en']
+
     return (
         <InteriorPageLayout
             breadcrumb={lang === 'es' ? 'Nosotros' : lang === 'it' ? 'Chi siamo' : 'About'}
@@ -22,40 +96,67 @@ export default function AboutOverviewPage({ lang }: { lang: string }) {
                 </p>
             </div>
 
-            {/* What we do */}
+            {/* What we do — Three Horizons */}
             <div className="mb-12">
-                <h2 className="text-xl font-bold font-display mb-4">
+                <h2 className="text-xl font-bold font-display mb-2">
                     {lang === 'es' ? 'Qué hacemos' : lang === 'it' ? 'Cosa facciamo' : 'What we do'}
                 </h2>
-                <p className="text-base text-opinno-gray font-body leading-relaxed mb-6">
-                    {lang === 'es' ? 'Somos el punto de encuentro entre la innovación, la transformación y la tecnología. Nuestro modelo de negocio ayuda a nuestros clientes a monitorizar y a entender el mercado.' : lang === 'it' ? 'Siamo il punto d\'incontro tra innovazione, trasformazione e tecnologia. Il nostro modello di servizio aiuta i nostri clienti a monitorare e comprendere il mercato.' : 'We are the meeting point for innovation, transformation, and technology. Our service model helps our clients to monitor and understand the market.'}
+                <p className="text-base text-opinno-gray font-body leading-relaxed mb-8">
+                    {lang === 'es'
+                        ? 'Estructuramos nuestra experiencia en torno a un modelo de tres horizontes que abarca desde la inteligencia estratégica hasta la innovación disruptiva.'
+                        : lang === 'it'
+                        ? 'Strutturiamo la nostra competenza attorno a un modello a tre orizzonti che va dall\'intelligence strategica all\'innovazione dirompente.'
+                        : 'We structure our expertise around a three-horizons model spanning from strategic intelligence to disruptive innovation.'}
                 </p>
-                <ul className="space-y-4 ml-4">
-                    <li className="text-base text-opinno-gray font-body leading-relaxed">
-                        <span className="text-opinno-accent font-semibold">○ {lang === 'es' ? 'Innovación Abierta' : 'Open Innovation'}.</span> {lang === 'es' ? 'Entender el mercado es el punto de partida de la innovación. Nuestro grupo de innovación abierta proporciona al cliente inteligencia de mercado.' : 'Understanding the market is the starting point for innovation. Our open innovation group provides our clients with market intelligence.'}
-                    </li>
-                    <li className="text-base text-opinno-gray font-body leading-relaxed">
-                        <span className="text-opinno-accent font-semibold">○ {lang === 'es' ? 'Transformación' : lang === 'it' ? 'Trasformazione' : 'Transformation'}.</span> {lang === 'es' ? 'Ayudamos a transformar organizaciones construyendo una visión innovadora del futuro y adaptando la cultura a la nueva economía.' : 'We help transform organizations, building an innovative vision of the future, adapting the culture to the new rules.'}
-                    </li>
-                    <li className="text-base text-opinno-gray font-body leading-relaxed">
-                        <span className="text-opinno-accent font-semibold">○ Venture Building.</span> {lang === 'es' ? 'Apoyamos a nuestros clientes diseñando y construyendo nuevos productos, prototipos o incluso nuevos negocios.' : 'We support our clients by designing and building new products, prototypes, or even entire businesses.'}
-                    </li>
-                    <li className="text-base text-opinno-gray font-body leading-relaxed">
-                        <span className="text-opinno-accent font-semibold">○ {lang === 'es' ? 'Soluciones Tecnológicas' : lang === 'it' ? 'Soluzioni Tecnologiche' : 'Technology Solutions'}.</span> {lang === 'es' ? 'Construimos productos digitales y plataformas impulsando la innovación a escala.' : 'We build digital products and platforms that drive innovation at scale.'}
-                    </li>
-                </ul>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    {horizons.map(horizon => (
+                        <Link
+                            key={horizon.tag}
+                            href={horizon.href}
+                            className="group bg-opinno-light-bg rounded-xl overflow-hidden border border-opinno-border hover:border-opinno-accent transition-colors"
+                        >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={horizon.image}
+                                alt={`${horizon.tag} — ${horizon.title}`}
+                                className="w-full h-36 object-cover"
+                                loading="lazy"
+                            />
+                            <div className="p-5">
+                                <span className="inline-block text-xs font-bold tracking-widest text-opinno-accent mb-1">
+                                    {horizon.tag}
+                                </span>
+                                <h3 className="text-base font-bold font-display mb-2 group-hover:text-opinno-accent transition-colors">
+                                    {horizon.title}
+                                </h3>
+                                <p className="text-sm text-opinno-gray font-body leading-relaxed">
+                                    {horizon.description}
+                                </p>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
             </div>
 
-            {/* How we do it / Why we do it combined structure localized */}
+            {/* Why we do it */}
             <div className="mb-12">
                 <h2 className="text-xl font-bold font-display mb-4">
                     {lang === 'es' ? 'Por qué lo hacemos' : lang === 'it' ? 'Perché lo facciamo' : 'Why we do it'}
                 </h2>
                 <p className="text-base text-opinno-gray font-body leading-relaxed mb-4">
-                    {lang === 'es' ? 'Creemos firmemente que la innovación debe tener un impacto positivo en la sociedad y el medio ambiente.' : lang === 'it' ? 'Crediamo che l\'innovazione debba avere un impatto positivo sulla società e sull\'ambiente.' : 'We believe innovation must have a positive impact on society and the environment.'}
+                    {lang === 'es'
+                        ? 'Creemos firmemente que la innovación debe tener un impacto positivo en la sociedad y el medio ambiente.'
+                        : lang === 'it'
+                        ? "Crediamo che l'innovazione debba avere un impatto positivo sulla società e sull'ambiente."
+                        : 'We believe innovation must have a positive impact on society and the environment.'}
                 </p>
                 <p className="text-base text-opinno-gray font-body leading-relaxed">
-                    {lang === 'es' ? 'Como B Corp certificada, cumplimos los mayores estándares y garantizamos la calidad y consistencia global.' : 'As a Certified B Corp, we meet the highest standards of social and environmental performance, accountability, and transparency.'}
+                    {lang === 'es'
+                        ? 'Como B Corp certificada, cumplimos los mayores estándares y garantizamos la calidad y consistencia global.'
+                        : lang === 'it'
+                        ? "Come B Corp certificata, rispettiamo i più alti standard di performance sociale e ambientale, responsabilità e trasparenza."
+                        : 'As a Certified B Corp, we meet the highest standards of social and environmental performance, accountability, and transparency.'}
                 </p>
             </div>
 
