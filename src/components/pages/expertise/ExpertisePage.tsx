@@ -1,5 +1,5 @@
 import InteriorPageLayout from '@/components/InteriorPageLayout'
-import { getSidebar, PARTNER_LOGOS } from '@/lib/page-data'
+import { getSidebar } from '@/lib/page-data'
 import Link from 'next/link'
 
 export default function ExpertisePage({ lang }: { lang: string }) {
@@ -212,11 +212,8 @@ export default function ExpertisePage({ lang }: { lang: string }) {
             {/* Partners */}
             <div className="mt-8 pt-12 border-t border-opinno-border">
                 <h3 className="text-sm font-bold text-opinno-gray mb-6 tracking-wide uppercase">{c.partnersTitle}</h3>
-                <div className="flex flex-wrap items-center gap-8 md:gap-12 opacity-60 grayscale">
-                    {PARTNER_LOGOS.map(logo => (
-                        <img key={logo.name} src={logo.src} alt={logo.name} className="h-8 md:h-10 object-contain" loading="lazy" />
-                    ))}
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/partners.png" alt="Opinno Partners" className="w-full h-auto opacity-60 grayscale" loading="lazy" />
             </div>
         </InteriorPageLayout>
     )

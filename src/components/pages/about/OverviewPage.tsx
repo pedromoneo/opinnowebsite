@@ -1,5 +1,5 @@
 import InteriorPageLayout from '@/components/InteriorPageLayout'
-import { getSidebar, PARTNER_LOGOS } from '@/lib/page-data'
+import { getSidebar } from '@/lib/page-data'
 import Link from 'next/link'
 
 const HORIZONS: Record<string, { tag: string; title: string; description: string; href: string; image: string }[]> = {
@@ -162,17 +162,8 @@ export default function AboutOverviewPage({ lang }: { lang: string }) {
 
             {/* Partners logos */}
             <div className="mt-16 pt-12 border-t border-opinno-border">
-                <div className="flex flex-wrap items-center gap-8 md:gap-12 opacity-60 grayscale">
-                    {PARTNER_LOGOS.map(logo => (
-                        <img
-                            key={logo.name}
-                            src={logo.src}
-                            alt={logo.name}
-                            className="h-8 md:h-10 object-contain"
-                            loading="lazy"
-                        />
-                    ))}
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/partners.png" alt="Opinno Partners" className="w-full h-auto opacity-60 grayscale" loading="lazy" />
             </div>
         </InteriorPageLayout>
     )

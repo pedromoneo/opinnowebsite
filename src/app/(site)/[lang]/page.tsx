@@ -446,6 +446,14 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                 </div>
             </section>
 
+            {/* ===== PARTNERS SECTION ===== */}
+            <section className="py-16 border-t border-opinno-border">
+                <div className="section-container">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/partners.png" alt="Opinno Partners" className="w-full h-auto opacity-60 grayscale" loading="lazy" />
+                </div>
+            </section>
+
             {/* ===== CONTACT / GET IN TOUCH SECTION ===== */}
             <section className="bg-opinno-light-bg py-20">
                 <div className="section-container">
