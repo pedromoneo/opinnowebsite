@@ -11,6 +11,12 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
     const { lang } = resolvedParams
     const slugPath = resolvedParams.slug.join('/')
 
+    // Hidden pages — return 404
+    const HIDDEN_SLUGS = new Set(['community'])
+    if (HIDDEN_SLUGS.has(slugPath)) {
+        return notFound()
+    }
+
     // 1. Check if this is a static page first
     if (isStaticPage(slugPath)) {
         const component = getStaticPageComponent(slugPath, lang)

@@ -426,26 +426,6 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                 </div>
             </section>
 
-            {/* ===== JOIN OUR COMMUNITY SECTION ===== */}
-            <section className="py-20">
-                <div className="section-container text-center">
-                    <h2 className="section-title mb-4">JOIN OUR COMMUNITY OF INNOVATORS</h2>
-                    <p className="text-opinno-gray text-lg font-body mb-10 max-w-2xl mx-auto">
-                        Participate in our community projects, events, competitions and courses.
-                    </p>
-                    <Link href="/community" className="btn-primary mb-16">
-                        LEARN MORE
-                    </Link>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
-                        <CommunityCard icon="💼" number="Jobs" label="We are hiring!" href="/work" />
-                        <CommunityCard icon="📅" number="169" label="Events" href="/events" />
-                        <CommunityCard icon="🏆" number="31" label="Challenges" href="/challenges" />
-                        <CommunityCard icon="📚" number="225" label="Courses" href="/academy" />
-                    </div>
-                </div>
-            </section>
-
             {/* ===== PARTNERS SECTION ===== */}
             <section className="py-16 border-t border-opinno-border">
                 <div className="section-container">
@@ -522,24 +502,6 @@ function StoryCard({ date, title, excerpt, image, href }: {
             <p className="text-sm text-opinno-gray font-body leading-relaxed line-clamp-2">
                 {excerpt}
             </p>
-        </Link>
-    )
-}
-
-function CommunityCard({ icon, number, label, href }: {
-    icon: string
-    number: string
-    label: string
-    href: string
-}) {
-    return (
-        <Link
-            href={href}
-            className="group bg-opinno-light-bg border border-opinno-border rounded-xl p-8 text-center card-hover hover:border-opinno-accent"
-        >
-            <div className="text-4xl mb-3">{icon}</div>
-            <div className="text-2xl font-bold text-opinno-accent mb-1">{number}</div>
-            <div className="text-sm text-opinno-gray font-body">{label}</div>
         </Link>
     )
 }
