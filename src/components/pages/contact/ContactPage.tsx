@@ -24,12 +24,11 @@ export default function ContactPage({ lang }: { lang: string }) {
             <div className="mt-12 pt-12 border-t border-opinno-border">
                 <h2 className="text-xl font-bold font-display mb-8">OPINNO GLOBAL</h2>
 
-                {/* Map visualization using a styled div with office markers */}
-                <div className="relative bg-gray-50 rounded-2xl p-8 mb-8 overflow-hidden" style={{ minHeight: '400px' }}>
-                    {/* World map background */}
+                {/* Map visualization */}
+                <div className="relative mb-8 overflow-hidden rounded-2xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src="https://opinno.com/wp-content/uploads/2023/06/opinno-map.png"
+                        src="/assets/HQ-Map-Opinno.jpg"
                         alt="Opinno Global Offices"
                         className="w-full h-auto"
                         loading="lazy"
