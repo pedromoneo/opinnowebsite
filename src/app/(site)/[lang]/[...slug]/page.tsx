@@ -99,12 +99,12 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
     return (
         <div className="min-h-[70vh] bg-white">
             <div className="container mx-auto px-6 max-w-4xl pt-10 pb-12">
-                {/* Featured image (contained, rounded) */}
-                {postData.featuredImage && (
+                {/* Featured image (contained, rounded) — prefers headerUrl, falls back to featuredImage */}
+                {(postData.headerUrl || postData.featuredImage) && (
                     <div className="w-full aspect-video rounded-2xl overflow-hidden mb-8">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                            src={postData.featuredImage}
+                            src={postData.headerUrl || postData.featuredImage}
                             alt={finalTitle}
                             className="object-cover w-full h-full"
                         />
