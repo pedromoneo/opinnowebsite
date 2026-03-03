@@ -15,6 +15,7 @@ interface GeneratedImages {
     featuredImage: string;
     thumbnailUrl: string;
     bannerUrl: string;
+    headerUrl: string;
 }
 
 /**
@@ -175,6 +176,7 @@ export async function generatePostImages(
             featuredImage: downloadUrl,
             thumbnailUrl: downloadUrl,
             bannerUrl: downloadUrl,
+            headerUrl: downloadUrl,
         };
     } catch (error) {
         console.error('Image generation failed:', error instanceof Error ? error.message : error);

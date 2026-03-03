@@ -53,7 +53,8 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
         publishedAt: (initialData?.publishedAt || '').split('T')[0] || new Date().toISOString().split('T')[0],
         wpTags: initialData?.wpTags || [],
         thumbnailUrl: initialData?.thumbnailUrl || '',
-        headerUrl: initialData?.headerUrl || '',
+        // Fallback: if headerUrl was never saved, use thumbnailUrl so both slots show the same image
+        headerUrl: initialData?.headerUrl || initialData?.thumbnailUrl || '',
         featuredImage: (initialData as any)?.featuredImage || initialData?.thumbnailUrl || '',
         publicationUrl: initialData?.publicationUrl || ''
     })
@@ -238,8 +239,11 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
                 setFormData(prev => ({
                     ...prev,
                     [field]: imageUrl,
-                    // Keep featuredImage in sync when thumbnail is regenerated
-                    ...(field === 'thumbnailUrl' ? { featuredImage: data.featuredImage || imageUrl } : {}),
+                    // Keep featuredImage and headerUrl in sync when thumbnail is generated
+                    ...(field === 'thumbnailUrl' ? {
+                        featuredImage: data.featuredImage || imageUrl,
+                        headerUrl: data.headerUrl || imageUrl,
+                    } : {}),
                 }))
             }
         } catch (err: any) {

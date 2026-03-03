@@ -8,6 +8,8 @@ import { db } from '@/lib/firebase'
 export default function AdminPosts() {
     const [posts, setPosts] = useState<DocumentData[]>([])
     const [loading, setLoading] = useState(true)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [langFilter, setLangFilter] = useState('')
     const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; postId: string | null; postTitle: string }>({
         isOpen: false, postId: null, postTitle: ''
     })
@@ -75,6 +77,16 @@ export default function AdminPosts() {
         return d instanceof Date && !isNaN(d.getTime()) ? d.toLocaleDateString() : '-'
     }
 
+    const filteredPosts = posts.filter(post => {
+        const q = searchQuery.toLowerCase()
+        const matchesSearch = !q ||
+            post.title?.toLowerCase().includes(q) ||
+            post.slug?.toLowerCase().includes(q) ||
+            (post.cmsCategory || post.subCategory || post.category || '').toLowerCase().includes(q)
+        const matchesLang = !langFilter || post.lang === langFilter
+        return matchesSearch && matchesLang
+    })
+
     return (
         <div className="flex flex-col gap-4 sm:gap-6">
             {/* Toast */}
@@ -123,9 +135,14 @@ export default function AdminPosts() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-3 border-b border-gray-100 flex items-center gap-3 bg-gray-50/50">
                     <input type="text" placeholder="Search posts..."
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
                         className="flex-1 rounded-lg border-gray-300 focus:border-opinno-accent focus:ring-opinno-accent text-sm py-1.5" />
-                    <select className="rounded-lg border-gray-300 focus:border-opinno-accent focus:ring-opinno-accent text-sm py-1.5">
-                        <option>All Languages</option>
+                    <select
+                        value={langFilter}
+                        onChange={e => setLangFilter(e.target.value)}
+                        className="rounded-lg border-gray-300 focus:border-opinno-accent focus:ring-opinno-accent text-sm py-1.5">
+                        <option value="">All Languages</option>
                         <option value="en">EN</option>
                         <option value="es">ES</option>
                         <option value="it">IT</option>
@@ -147,9 +164,11 @@ export default function AdminPosts() {
                         <tbody className="bg-white divide-y divide-gray-100">
                             {loading ? (
                                 <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-500">Loading posts...</td></tr>
-                            ) : posts.length === 0 ? (
-                                <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-500">No posts found.</td></tr>
-                            ) : posts.map((post) => (
+                            ) : filteredPosts.length === 0 ? (
+                                <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-500">
+                                    {posts.length === 0 ? 'No posts found.' : 'No posts match your search.'}
+                                </td></tr>
+                            ) : filteredPosts.map((post) => (
                                 <tr key={post.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-4 py-3 max-w-[260px]">
                                         <div className="font-medium text-gray-900 truncate">{post.title}</div>

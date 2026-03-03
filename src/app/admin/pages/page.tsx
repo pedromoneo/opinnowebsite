@@ -8,6 +8,8 @@ import { db } from '@/lib/firebase'
 export default function AdminPages() {
     const [pages, setPages] = useState<DocumentData[]>([])
     const [loading, setLoading] = useState(true)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [langFilter, setLangFilter] = useState('')
     const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; pageId: string | null; pageTitle: string }>({
         isOpen: false, pageId: null, pageTitle: ''
     })
@@ -75,6 +77,15 @@ export default function AdminPages() {
         return d instanceof Date && !isNaN(d.getTime()) ? d.toLocaleDateString() : '-'
     }
 
+    const filteredPages = pages.filter(page => {
+        const q = searchQuery.toLowerCase()
+        const matchesSearch = !q ||
+            page.title?.toLowerCase().includes(q) ||
+            page.slug?.toLowerCase().includes(q)
+        const matchesLang = !langFilter || page.lang === langFilter
+        return matchesSearch && matchesLang
+    })
+
     return (
         <div className="flex flex-col gap-4 sm:gap-6">
             {/* Toast */}
@@ -123,9 +134,14 @@ export default function AdminPages() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-3 border-b border-gray-100 flex items-center gap-3 bg-gray-50/50">
                     <input type="text" placeholder="Search pages..."
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
                         className="flex-1 rounded-lg border-gray-300 focus:border-opinno-accent focus:ring-opinno-accent text-sm py-1.5" />
-                    <select className="rounded-lg border-gray-300 focus:border-opinno-accent focus:ring-opinno-accent text-sm py-1.5">
-                        <option>All Languages</option>
+                    <select
+                        value={langFilter}
+                        onChange={e => setLangFilter(e.target.value)}
+                        className="rounded-lg border-gray-300 focus:border-opinno-accent focus:ring-opinno-accent text-sm py-1.5">
+                        <option value="">All Languages</option>
                         <option value="en">EN</option>
                         <option value="es">ES</option>
                         <option value="it">IT</option>
@@ -146,9 +162,11 @@ export default function AdminPages() {
                         <tbody className="bg-white divide-y divide-gray-100">
                             {loading ? (
                                 <tr><td colSpan={5} className="px-4 py-10 text-center text-gray-500">Loading pages...</td></tr>
-                            ) : pages.length === 0 ? (
-                                <tr><td colSpan={5} className="px-4 py-10 text-center text-gray-500">No pages found.</td></tr>
-                            ) : pages.map((page) => (
+                            ) : filteredPages.length === 0 ? (
+                                <tr><td colSpan={5} className="px-4 py-10 text-center text-gray-500">
+                                    {pages.length === 0 ? 'No pages found.' : 'No pages match your search.'}
+                                </td></tr>
+                            ) : filteredPages.map((page) => (
                                 <tr key={page.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-4 py-3 max-w-[300px]">
                                         <div className="font-medium text-gray-900 truncate">{page.title}</div>

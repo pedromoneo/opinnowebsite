@@ -127,7 +127,7 @@ export async function POST(req: Request) {
 
         // Auto-generate images if none provided
         const hasImages = data.featuredImage || data.thumbnailUrl || data.bannerUrl;
-        let generatedImages: { featuredImage?: string; thumbnailUrl?: string; bannerUrl?: string } = {};
+        let generatedImages: { featuredImage?: string; thumbnailUrl?: string; bannerUrl?: string; headerUrl?: string } = {};
         if (!hasImages && data.title) {
             const contentType = type || data.type || 'post';
             const images = await generatePostImages(data.title, data.excerpt, contentType);
