@@ -26,6 +26,7 @@ type PostData = {
     wpTags: string[];
     thumbnailUrl?: string;
     headerUrl?: string;
+    featuredImage?: string;
     publicationUrl?: string;
 }
 
@@ -53,6 +54,7 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
         wpTags: initialData?.wpTags || [],
         thumbnailUrl: initialData?.thumbnailUrl || '',
         headerUrl: initialData?.headerUrl || '',
+        featuredImage: (initialData as any)?.featuredImage || initialData?.thumbnailUrl || '',
         publicationUrl: initialData?.publicationUrl || ''
     })
 
@@ -90,6 +92,8 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
                 slugPath: finalSlugPath,
                 publishedAt: publishedAtISO,
                 updatedAt: nowISO,
+                // Always keep featuredImage in sync with thumbnailUrl (website uses featuredImage for display)
+                featuredImage: formData.thumbnailUrl || formData.featuredImage || '',
                 // Set createdAt only when creating a new post (never overwrite on edit)
                 ...(isNew ? { createdAt: nowISO } : {}),
             }
@@ -194,7 +198,12 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
             const fileRef = ref(storage, `images/${Date.now()}_${file.name}`)
             const uploadTask = await uploadBytesResumable(fileRef, file)
             const downloadUrl = await getDownloadURL(uploadTask.ref)
-            setFormData(prev => ({ ...prev, [fieldName]: downloadUrl }))
+            setFormData(prev => ({
+                ...prev,
+                [fieldName]: downloadUrl,
+                // Keep featuredImage in sync when thumbnail is manually uploaded
+                ...(fieldName === 'thumbnailUrl' ? { featuredImage: downloadUrl } : {}),
+            }))
         } catch (err: any) {
             alert(`Error uploading image: ${err.message}`)
         }
@@ -226,7 +235,12 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
             const data = await res.json()
             const imageUrl = data[field]
             if (imageUrl) {
-                setFormData(prev => ({ ...prev, [field]: imageUrl }))
+                setFormData(prev => ({
+                    ...prev,
+                    [field]: imageUrl,
+                    // Keep featuredImage in sync when thumbnail is regenerated
+                    ...(field === 'thumbnailUrl' ? { featuredImage: data.featuredImage || imageUrl } : {}),
+                }))
             }
         } catch (err: any) {
             alert(`Error generating image: ${err.message}`)
