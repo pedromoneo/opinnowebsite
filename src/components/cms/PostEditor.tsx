@@ -49,7 +49,7 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
         cmsCategory: VALID_CATEGORIES.includes(mappedCategory) ? mappedCategory : '',
         slug: initialData?.slug || '',
         lang: initialData?.lang || 'en',
-        publishedAt: initialData?.publishedAt || new Date().toISOString().split('T')[0],
+        publishedAt: (initialData?.publishedAt || '').split('T')[0] || new Date().toISOString().split('T')[0],
         wpTags: initialData?.wpTags || [],
         thumbnailUrl: initialData?.thumbnailUrl || '',
         headerUrl: initialData?.headerUrl || '',
@@ -75,13 +75,23 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
                 : 'insights'
             const finalSlugPath = isStory ? `story/${formData.slug}` : `insights/${formData.slug}`
 
+            const nowISO = new Date().toISOString()
+
+            // Convert date-only string (from date input) to full ISO timestamp
+            const publishedAtISO = formData.publishedAt
+                ? (formData.publishedAt.includes('T') ? formData.publishedAt : `${formData.publishedAt}T00:00:00.000Z`)
+                : nowISO
+
             const dataToSave = {
                 ...formData,
                 cmsCategory: formData.cmsCategory,
                 category: finalCategory,
                 subCategory: finalSubCategory,
                 slugPath: finalSlugPath,
-                updatedAt: new Date().toISOString()
+                publishedAt: publishedAtISO,
+                updatedAt: nowISO,
+                // Set createdAt only when creating a new post (never overwrite on edit)
+                ...(isNew ? { createdAt: nowISO } : {}),
             }
 
             await setDoc(docRef, dataToSave, { merge: true })

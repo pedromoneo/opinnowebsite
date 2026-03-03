@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { doc, getDoc, DocumentData } from 'firebase/firestore'
+import { doc, getDocFromServer, DocumentData } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import PostEditor from '@/components/cms/PostEditor'
 
@@ -16,7 +16,7 @@ export default function EditPostPage() {
         const fetchPost = async () => {
             try {
                 const docRef = doc(db, 'content', id)
-                const docSnap = await getDoc(docRef)
+                const docSnap = await getDocFromServer(docRef)
 
                 if (docSnap.exists()) {
                     setPostData({ id: docSnap.id, ...docSnap.data() })
