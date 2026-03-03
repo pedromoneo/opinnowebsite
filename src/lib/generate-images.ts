@@ -1,6 +1,10 @@
 /**
  * Auto-generate post images using Google's Imagen API via @google/genai SDK.
- * Generates a single 16:9 image and uploads it to Firebase Storage.
+ * Two-step pipeline:
+ *   1. Gemini converts the article title/excerpt into a purely visual scene description
+ *      (raw title text NEVER reaches Imagen — prevents text rendering in images)
+ *   2. Imagen generates the image from the visual description
+ * Uploads result to Firebase Storage.
  */
 import { GoogleGenAI } from '@google/genai';
 
@@ -12,6 +16,94 @@ interface GeneratedImages {
     thumbnailUrl: string;
     bannerUrl: string;
 }
+
+/**
+ * Step 1: Use Gemini to translate the article title/excerpt into a purely visual
+ * scene description. This means Imagen never receives the raw title string,
+ * preventing it from rendering words as graphic elements in the image.
+ */
+async function getVisualSceneDescription(
+    ai: GoogleGenAI,
+    title: string,
+    excerpt: string | undefined,
+    type: string | undefined,
+    palette: string,
+): Promise<string> {
+    const excerptHint = excerpt ? `\nArticle summary: ${excerpt.slice(0, 300)}` : '';
+    const styleHint = type === 'story'
+        ? 'warm documentary photography, authentic human moments, candid natural light'
+        : 'vibrant editorial photography, dynamic composition, bold and modern';
+
+    const geminiPrompt = `You are a creative director describing a photograph for a magazine.
+
+Convert the following article topic into a purely visual scene description for a stock photo.
+CRITICAL RULES:
+- Describe ONLY what is physically visible in the scene (objects, people, environment, light, colours)
+- Do NOT mention any text, words, letters, signs, screens with text, or written language
+- Do NOT use the article title or any words from it literally — translate the concept into visuals
+- Do NOT include screen content, books with visible text, whiteboards with text, or any readable characters
+- Keep the description to 2-3 sentences maximum
+
+Article topic: ${title}${excerptHint}
+Visual style: ${styleHint}
+Colour palette to use: ${palette}
+
+Respond with ONLY the visual scene description. No preamble, no labels, no quotes.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: geminiPrompt,
+        });
+        const description = response.text?.trim();
+        if (description && description.length > 20) {
+            console.log(`Visual scene description: "${description}"`);
+            return description;
+        }
+    } catch (err) {
+        console.warn('Gemini scene description failed, using fallback:', err instanceof Error ? err.message : err);
+    }
+
+    // Fallback: generic visual description if Gemini fails
+    const styleWord = type === 'story' ? 'candid documentary' : 'editorial';
+    return `A ${styleWord} photograph of diverse professionals collaborating in a modern open workspace, ${palette}, cinematic natural lighting.`;
+}
+
+/**
+ * Step 2: Build the Imagen prompt from the visual scene description.
+ * The raw article title is NEVER included here.
+ */
+function buildImagenPrompt(visualDescription: string, style: string, palette: string): string {
+    return [
+        'ABSOLUTE RULE: ZERO TEXT. NO WORDS. NO LETTERS. NO NUMBERS. NO SIGNS. NO LABELS. NO LOGOS. NO WATERMARKS. NO CAPTIONS. NO TYPOGRAPHY OF ANY KIND ANYWHERE IN THE IMAGE.',
+        'This image must contain purely photographic visual content — no written characters whatsoever.',
+        `${visualDescription}`,
+        `Visual style: ${style}.`,
+        `Colour palette: ${palette}.`,
+        'The scene should feel energetic, human, and forward-looking.',
+        'Strictly avoid: cold corporate blues, flat greys, glowing circuit boards, data visualisations, sterile offices, clichéd tech aesthetics.',
+        'Focus on: people in authentic interaction, rich natural textures, interesting architecture, or abstract patterns evoking creativity.',
+        'Photorealistic, cinematic lighting, 16:9 wide composition.',
+        'FINAL CHECK: The image must be 100% free of any text, letters, numbers, words, captions, titles, labels, watermarks, logos, signage, or written characters of any kind.',
+    ].join(' ');
+}
+
+// Varied colour palettes — deliberately excludes ochre, amber, rust, burnt orange,
+// saffron, mustard, caramel, burnt sienna, and terracotta (which tend to dominate)
+const COLOR_PALETTES = [
+    'deep emerald green, sage, soft cream, muted rose, silver',
+    'rich burgundy, dusty mauve, warm ivory, antique gold, stone grey',
+    'deep sapphire blue, warm white, dove grey, soft coral, pearl',
+    'forest green, deep violet, cool white, slate, pale lilac',
+    'deep plum, blush pink, champagne, soft lavender, warm grey',
+    'cobalt blue, warm sand, terracotta-free beige, deep navy, off-white',
+    'charcoal, raspberry red, cool grey, pale pink, crisp white',
+    'deep teal, sea green, warm linen, soft mint, natural white',
+    'merlot, dusty rose, warm stone, powder blue, cream',
+    'dark indigo, electric violet, cool cream, soft periwinkle, light grey',
+    'hunter green, pale gold, deep brown, warm white, moss',
+    'dark chocolate brown, warm peach, cream, dusty green, natural linen',
+];
 
 /**
  * Generate post images from the title/excerpt and upload to Firebase Storage.
@@ -29,17 +121,28 @@ export async function generatePostImages(
     }
 
     try {
-        const prompt = buildPrompt(title, excerpt, type);
         const ai = new GoogleGenAI({ apiKey });
 
-        // Try each model until one succeeds
+        // Pick a random palette each call for variety
+        const palette = COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
+        const style = type === 'story'
+            ? 'warm documentary photography, authentic human moments, rich natural tones, candid'
+            : 'vibrant editorial photography, dynamic composition, rich textures, bold composition';
+
+        // Step 1: Convert title → pure visual scene description (Gemini)
+        const visualDescription = await getVisualSceneDescription(ai, title, excerpt, type, palette);
+
+        // Step 2: Build the Imagen prompt from the visual description (no raw title)
+        const imagenPrompt = buildImagenPrompt(visualDescription, style, palette);
+
+        // Step 3: Generate image with Imagen
         let imageBytes: string | undefined;
         for (const model of IMAGE_MODELS) {
             try {
                 console.log(`Generating image for: "${title}" using model ${model}`);
                 const response = await ai.models.generateImages({
                     model: model.trim(),
-                    prompt,
+                    prompt: imagenPrompt,
                     config: {
                         numberOfImages: 1,
                         aspectRatio: '16:9',
@@ -77,32 +180,6 @@ export async function generatePostImages(
         console.error('Image generation failed:', error instanceof Error ? error.message : error);
         return null;
     }
-}
-
-// Rotate through varied colour palettes so images don't all look the same
-const COLOR_PALETTES = [
-    'deep forest greens, moss, jade, warm cream, burnt sienna accents',
-    'rich burgundy, dusty rose, warm taupe, gold, ivory',
-    'saffron yellow, paprika red, sand, warm brown, off-white',
-    'deep teal, coral, warm sand, terracotta, soft peach',
-    'indigo, lavender, warm stone, copper accents, cream',
-    'olive green, mustard, rust, warm grey, linen white',
-    'deep plum, blush pink, warm tan, bronze, champagne',
-    'forest green, burnt orange, ochre, dark wood, cream',
-    'charcoal, warm amber, caramel, ivory, soft gold',
-    'peacock blue, saffron, rich brown, warm white, coral accents',
-];
-
-function buildPrompt(title: string, excerpt?: string, type?: string): string {
-    const context = excerpt ? ` Thematic context: ${excerpt.slice(0, 200)}.` : '';
-    const style = type === 'story'
-        ? 'warm documentary photography, authentic human moments, rich natural tones, candid'
-        : 'vibrant editorial photography, dynamic composition, rich textures, bold composition';
-
-    // Pick a random palette each time so images vary
-    const palette = COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
-
-    return `NO TEXT. NO WORDS. NO LETTERS. NO NUMBERS. NO SIGNS. NO LABELS. NO LOGOS. ZERO TYPOGRAPHY OF ANY KIND ANYWHERE IN THE IMAGE. Pure photographic imagery only. A striking editorial photograph inspired by the theme: ${title}.${context} Visual style: ${style}. Colour palette: ${palette}. The image should feel energetic, human, and forward-looking. Avoid cold blues, flat greys, generic tech backdrops, and clichéd corporate or AI aesthetics (no glowing circuit boards, no data visualisations, no sterile offices). Focus on people collaborating, natural textures, architectural details, or abstract patterns that evoke creativity and transformation. Photorealistic, cinematic lighting, 16:9 composition. REMINDER: The final image must be 100% free of any text, letters, numbers, words, captions, titles, labels, watermarks, logos, signage, or written characters of any kind.`;
 }
 
 async function uploadToStorage(imageBuffer: Buffer, path: string): Promise<string> {
