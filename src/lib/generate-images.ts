@@ -79,13 +79,30 @@ export async function generatePostImages(
     }
 }
 
+// Rotate through varied colour palettes so images don't all look the same
+const COLOR_PALETTES = [
+    'deep forest greens, moss, jade, warm cream, burnt sienna accents',
+    'rich burgundy, dusty rose, warm taupe, gold, ivory',
+    'saffron yellow, paprika red, sand, warm brown, off-white',
+    'deep teal, coral, warm sand, terracotta, soft peach',
+    'indigo, lavender, warm stone, copper accents, cream',
+    'olive green, mustard, rust, warm grey, linen white',
+    'deep plum, blush pink, warm tan, bronze, champagne',
+    'forest green, burnt orange, ochre, dark wood, cream',
+    'charcoal, warm amber, caramel, ivory, soft gold',
+    'peacock blue, saffron, rich brown, warm white, coral accents',
+];
+
 function buildPrompt(title: string, excerpt?: string, type?: string): string {
-    const context = excerpt ? ` The article is about: ${excerpt.slice(0, 200)}` : '';
+    const context = excerpt ? ` Thematic context: ${excerpt.slice(0, 200)}.` : '';
     const style = type === 'story'
         ? 'warm documentary photography, authentic human moments, rich natural tones, candid'
-        : 'vibrant editorial photography, dynamic composition, warm earthy tones, rich textures';
+        : 'vibrant editorial photography, dynamic composition, rich textures, bold composition';
 
-    return `A striking editorial photograph for an innovation consultancy article titled "${title}".${context} Visual style: ${style}. The image should feel energetic, human, and forward-looking. Use warm, rich colour palettes — terracotta, amber, sage green, ochre, warm white — avoid cold blues, grey tech backgrounds, and generic corporate stock aesthetics. Focus on people collaborating, natural textures, architectural details, or abstract patterns that evoke creativity and transformation. CRITICAL RULE: The image must contain absolutely zero text, letters, numbers, words, captions, titles, labels, watermarks, logos, signage, or written characters of any kind. Pure visual imagery only, no typography anywhere in the frame. Photorealistic, cinematic lighting, 16:9 composition.`;
+    // Pick a random palette each time so images vary
+    const palette = COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
+
+    return `NO TEXT. NO WORDS. NO LETTERS. NO NUMBERS. NO SIGNS. NO LABELS. NO LOGOS. ZERO TYPOGRAPHY OF ANY KIND ANYWHERE IN THE IMAGE. Pure photographic imagery only. A striking editorial photograph inspired by the theme: ${title}.${context} Visual style: ${style}. Colour palette: ${palette}. The image should feel energetic, human, and forward-looking. Avoid cold blues, flat greys, generic tech backdrops, and clichéd corporate or AI aesthetics (no glowing circuit boards, no data visualisations, no sterile offices). Focus on people collaborating, natural textures, architectural details, or abstract patterns that evoke creativity and transformation. Photorealistic, cinematic lighting, 16:9 composition. REMINDER: The final image must be 100% free of any text, letters, numbers, words, captions, titles, labels, watermarks, logos, signage, or written characters of any kind.`;
 }
 
 async function uploadToStorage(imageBuffer: Buffer, path: string): Promise<string> {

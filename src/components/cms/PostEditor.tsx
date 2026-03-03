@@ -33,6 +33,7 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
     const router = useRouter()
     const [saving, setSaving] = useState(false)
     const [generatingTags, setGeneratingTags] = useState(false)
+    const [generatingImages, setGeneratingImages] = useState<{ thumbnailUrl: boolean; headerUrl: boolean }>({ thumbnailUrl: false, headerUrl: false })
     const [showHtml, setShowHtml] = useState(false)
 
     // Map legacy 'article' cmsCategory to 'insights'
@@ -189,6 +190,41 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
         }
     }
 
+    const generateImage = async (field: 'thumbnailUrl' | 'headerUrl') => {
+        if (!formData.title) {
+            alert('Please add a title first to generate an image.')
+            return
+        }
+
+        setGeneratingImages(prev => ({ ...prev, [field]: true }))
+        try {
+            const res = await fetch('/api/generate-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: formData.title,
+                    excerpt: formData.excerpt,
+                    type: (formData.cmsCategory === 'impact stories' || formData.cmsCategory === 'news') ? 'story' : 'post'
+                })
+            })
+
+            if (!res.ok) {
+                const errData = await res.json()
+                throw new Error(errData.error || 'Failed to generate image.')
+            }
+
+            const data = await res.json()
+            const imageUrl = data[field]
+            if (imageUrl) {
+                setFormData(prev => ({ ...prev, [field]: imageUrl }))
+            }
+        } catch (err: any) {
+            alert(`Error generating image: ${err.message}`)
+        } finally {
+            setGeneratingImages(prev => ({ ...prev, [field]: false }))
+        }
+    }
+
     return (
         <form onSubmit={handleSave} className="flex flex-col gap-8 max-w-4xl">
             <header className="flex items-center justify-between pb-4 border-b border-gray-200">
@@ -290,15 +326,35 @@ export default function PostEditor({ initialData, isNew = false }: { initialData
                                 <div key={img.field} className="flex flex-col gap-2">
                                     <label className="block text-sm font-semibold text-gray-700">{img.label}</label>
                                     {formData[img.field] ? (
-                                        <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-gray-200">
-                                            <img src={formData[img.field]} alt="" className="object-cover w-full h-full" />
-                                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, [img.field]: '' }))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow">×</button>
-                                        </div>
+                                        <>
+                                            <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-gray-200">
+                                                <img src={formData[img.field]} alt="" className="object-cover w-full h-full" />
+                                                <button type="button" onClick={() => setFormData(prev => ({ ...prev, [img.field]: '' }))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow">×</button>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => generateImage(img.field)}
+                                                disabled={generatingImages[img.field]}
+                                                className="text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 font-medium transition-colors disabled:opacity-50 flex items-center gap-1 w-full justify-center"
+                                            >
+                                                {generatingImages[img.field] ? '✨ Generating…' : '✨ Regenerate with AI'}
+                                            </button>
+                                        </>
                                     ) : (
-                                        <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                            <span className="text-xs text-gray-500 text-center px-2">Upload {img.label}</span>
-                                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, img.field)} />
-                                        </label>
+                                        <>
+                                            <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                <span className="text-xs text-gray-500 text-center px-2">Upload {img.label}</span>
+                                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, img.field)} />
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => generateImage(img.field)}
+                                                disabled={generatingImages[img.field]}
+                                                className="text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 font-medium transition-colors disabled:opacity-50 flex items-center gap-1 w-full justify-center"
+                                            >
+                                                {generatingImages[img.field] ? '✨ Generating…' : '✨ Generate with AI'}
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             ))}

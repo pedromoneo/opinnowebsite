@@ -191,8 +191,8 @@ export default async function LangHomePage({ params }: { params: Promise<{ lang:
                             <img
                                 src="https://www.marques-de-france.fr/wp-content/uploads/2023/11/b-corp-logo.jpg"
                                 alt="B Corp Certified"
-                                className="h-[1.75em] w-auto grayscale"
-                                style={{ height: '1.75em', fontSize: 'inherit' }}
+                                className="h-[3.5em] w-auto grayscale"
+                                style={{ height: '3.5em', fontSize: 'inherit' }}
                             />
                             <span className="text-opinno-gray text-sm font-body">Opinno is a certified B Corporation</span>
                         </div>

@@ -25,6 +25,24 @@ export default function CompliancePage({ lang }: { lang: string }) {
                             : 'Reports submitted through the Internal Ethics Channel shall be processed in accordance with the principles of confidentiality, diligence, independence, objectivity, and respect for the rights of all persons involved, in compliance with Spanish Law 2/2023 of 20 February, regulating the protection of persons who report regulatory infringements and combating corruption.'}
                 </p>
 
+                {/* Link to form */}
+                <div className="mb-8 p-6 bg-opinno-light-bg rounded-xl border border-opinno-border">
+                    <p className="font-semibold text-opinno-primary mb-3">
+                        {lang === 'es' ? 'Enlace al formulario' : lang === 'it' ? 'Link al modulo' : 'Link to form'}
+                    </p>
+                    <a
+                        href="https://opinno.personiowhistleblowing.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-opinno-accent text-white font-bold rounded-lg hover:bg-opinno-accent-hover transition-colors text-sm"
+                    >
+                        {lang === 'es' ? 'Acceder al Canal de Denuncias' : lang === 'it' ? 'Accedi al Canale di Segnalazione' : 'Access the Reporting Channel'}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                    </a>
+                </div>
+
                 {/* Submission and Content */}
                 <h3 className="text-lg font-bold font-display text-opinno-primary mb-3">
                     {lang === 'es' ? 'Presentación y contenido de las denuncias' : lang === 'it' ? 'Presentazione e contenuto delle segnalazioni' : 'Submission and Content of Reports'}

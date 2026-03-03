@@ -62,15 +62,24 @@ export default async function DynamicLocalizedPage({ params }: { params: Promise
         .replace(/\\\\n/g, '')                     // strip literal backslash-n sequences
         .replace(/\\\\_/g, '')                     // strip markdown escape: \_
         .replace(/\\\\\\\\/g, '')                  // strip double backslashes
-        .replace(/>\s*n+\s*</g, '><')              // remove stray 'n's between HTML tags
-        .replace(/^\s*n+\s*(?=<)/g, '')            // remove stray 'n's at the start before an HTML tag
-        .replace(/(?<=>)\s*n+\s*$/g, '')           // remove stray 'n's at the end after an HTML tag
+        .replace(/>\s*n+\s*</g, '><')                         // remove stray 'n's between HTML tags
+        .replace(/^\s*n+\s*(?=<)/g, '')                        // remove stray 'n's at the start before an HTML tag
+        .replace(/(?<=>)\s*n+\s*$/g, '')                       // remove stray 'n's at the end after an HTML tag
+        .replace(/\n[ \t]*(?:n[ \t]*)+(?=\n|$)/g, '')         // remove 'n' chars on their own line (e.g. \nn\nn from escaped newlines)
         .trim()
 
-    // Remove leading <img> from content if we already show the featured image
-    // WordPress exports use various formats: <img.../>, <img...>, <img...></img>, <img...></ img>
+    // Remove the first image block at the start of content (duplicate of the featured/header image)
+    // Handles WordPress patterns: bare <img>, <figure><img/></figure>, <p><img/></p>
     if (postData.featuredImage) {
-        finalContent = finalContent.replace(/^\s*<img[^>]*>(?:\s*<\/\s*img\s*>)?\s*/i, '')
+        // 1. Leading <figure> that contains an <img>
+        finalContent = finalContent.replace(
+            /^\s*<figure\b[^>]*>[\s\S]*?<\/figure>\s*/i,
+            (match: string) => /<img\b/i.test(match) ? '' : match
+        )
+        // 2. Leading <p> containing only an <img>
+        finalContent = finalContent.replace(/^\s*<p\b[^>]*>\s*<img\b[^>]*\/?>\s*(?:<\/img>)?\s*<\/p>\s*/i, '')
+        // 3. Bare <img> tag
+        finalContent = finalContent.replace(/^\s*<img\b[^>]*>(?:\s*<\/\s*img\s*>)?\s*/i, '')
     }
     let finalTitle = postData.title
 
